@@ -1,0 +1,4 @@
+When, ?Date
+Where, ?Place
+Who, ?Person
+What, ?variable
