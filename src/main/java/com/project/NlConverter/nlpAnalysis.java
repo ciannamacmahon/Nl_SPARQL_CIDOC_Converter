@@ -28,11 +28,12 @@ public class nlpAnalysis {
     public static void main(String[] args) throws FileNotFoundException {
         String question = "Where was Obama born?";
         nlpAnalysis.init();
-        populateTargetQuestions();
+        languageAnalysis(question);
+        // populateTargetQuestions();
         //   nlpAnalysis.findPOStags(question);
-        predictTarget();
+       // predictTarget();
         //       qualities = nlpAnalysis.dependancyParser(question);
-        nlpAnalysis.dependancyParser(question);
+        //nlpAnalysis.dependancyParser(question);
         // nlpAnalysis.pringQual(qualities);
     }
 
@@ -42,6 +43,7 @@ public class nlpAnalysis {
         Scanner scanner= new Scanner(file);
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
+            System.out.println(line);
             String[] parts = line.split(", ");
 
             // Add the array to the list
@@ -157,52 +159,98 @@ public class nlpAnalysis {
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
         pipeline = new StanfordCoreNLP(props);
     }
-    @SuppressWarnings("unchecked")
-    //    public static LinkedList<String> dependancyParser(String q1)
-    public static void dependancyParser(String q1)
-    {
-        String textQualitites="";
-        LinkedList<String> depParse= new LinkedList<>();
-        CoreDocument document = new CoreDocument(q1);
-        pipeline.annotate(document);
 
-        CoreSentence sentence=document.sentences().get(0);
+    public static void languageAnalysis(String query){
+        LinkedList<String> depParse= new LinkedList<>();
+        CoreDocument document = new CoreDocument(query);
+        pipeline.annotate(document);
+        findPOStags(document);
+        findNER(document);
+        constituencyParse(document,query);
+        dependancyParser(document,query);
+    }
+
+    public static void findPOStags(CoreDocument doc){
+        CoreSentence sentence=doc.sentences().get(0);
+        //Method 1
+        for(CoreLabel token:doc.tokens()){
+            System.out.println(String.format("%s\t%s", token.word(),token.tag()));
+            if(token.tag().contains("W")){
+                questionWord=token.word();
+            }
+        }
+        //Method 2:
         List<String>posTags=sentence.posTags();
         System.out.println("POS tags");
         System.out.println(posTags);
+    }
+    public static void findNER(CoreDocument doc){
+        System.out.println("---");
+        System.out.println("entities found");
+        String entity="";
+        for (CoreEntityMention em : doc.entityMentions()){
+            System.out.println("\tdetected entity: \t"+em.text()+"\t"+em.entityType());
+            question_entity=em.text();
 
-        // constituency parse for the second sentence
-        Tree constituencyParse = sentence.constituencyParse();
+        }
+       // System.out.println("---");
+       // System.out.println("tokens and ner tags");
+        // Gives this output: (Where,O) (was,O) (Obama,PERSON) (born,O) (?,O)
+      //  String tokensAndNERTags = doc.tokens().stream().map(token -> "("+token.word()+","+token.ner()+")").collect(
+      //          Collectors.joining(" "));
+     //   System.out.println(tokensAndNERTags);
+        //   return entity;
+
+    }
+
+    public static void constituencyParse(CoreDocument doc,String query){
+        CoreSentence sentence=doc.sentences().get(0);
+        //Method 1:
+        Tree constitParse1 = sentence.constituencyParse();
         System.out.println("Example: constituency parse");
-        System.out.println(constituencyParse);
+        System.out.println(constitParse1);
         System.out.println();
 
+        //Method 2:
+        Annotation docu=new Annotation(query);
+        pipeline.annotate(docu);
+        CoreMap sent=docu.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+
+        Tree constitParse2 = sent.get(TreeCoreAnnotations.TreeAnnotation.class);
+        System.out.println("Constituency Parse:");
+        System.out.println(constitParse2);
+    }
+    @SuppressWarnings("unchecked")
+    //    public static LinkedList<String> dependancyParser(String q1)
+    public static void dependancyParser(CoreDocument document, String query)
+    {
+        LinkedList<String> depParse= new LinkedList<>();
+       // Method 1:
+        CoreSentence sentence1=document.sentences().get(0);
         // dependency parse for the second sentence
-        SemanticGraph dependencyParse = sentence.dependencyParse();
+        SemanticGraph dependencyParse = sentence1.dependencyParse();
         System.out.println("Example: dependency parse");
         System.out.println(dependencyParse);
         System.out.println();
 
-        // for NER but i think this can all be done with same object type- look into this more
-        //       CoreDocument doc=new CoreDocument(q1);
-        //      pipeline.annotate(doc);
-        //Assumes there is only one sentence in the document ie. the question
-        //   CoreMap sentence =document.get(CoreAnnotations.SentencesAnnotation.class).get(0);
-//
-        //   NER(doc);
-        //   //Get constituency parse: CFG type output- nounPhrasees etc
-        //   Tree constituencyParse = sentence.get(TreeCoreAnnotations.TreeAnnotation.class);
-        //   System.out.println("Constituency Parse:");
-        //   System.out.println(constituencyParse);
+        //Method 2:
+        Annotation doc=new Annotation(query);
+        pipeline.annotate(doc);
+        CoreMap sentence=doc.get(CoreAnnotations.SentencesAnnotation.class).get(0);
 
-        // //Gets the dependancy Parse
-        //    //  SemanticGraph dependencyParse =
-        //    //             sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
-        ////// System.out.println("Depenecy parse");
-        //    //// for (TypedDependency typedDependency : dependencyParse.typedDependencies()) {
-        //////     String line = typedDependency.toString();
-        //////     depParse.add(line);
-        //////}
+        SemanticGraph depGraph =sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
+
+            //Gets the dependancy Parse
+
+            System.out.println("Depenecy parse");
+            for (TypedDependency typedDependency : depGraph.typedDependencies()) {
+                String line = typedDependency.toString();
+                System.out.println(line);
+                //depParse.add(line);
+
+            }
+
+
 
         //return depParse;
     }
