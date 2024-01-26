@@ -1,9 +1,7 @@
 package com.project.NlConverter;
 //nlpPipeline.java
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 import edu.stanford.nlp.pipeline.*;
 import edu.stanford.nlp.ling.*;
