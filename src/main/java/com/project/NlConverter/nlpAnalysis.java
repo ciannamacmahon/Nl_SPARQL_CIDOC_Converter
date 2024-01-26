@@ -24,7 +24,7 @@ public class nlpAnalysis {
     public static String unknown="";
     static StanfordCoreNLP pipeline;
     public static void main(String[] args) throws FileNotFoundException {
-        String question = "Where was Obama born?";
+        String question = "When was Abbadie, Jacques born?";
         nlpAnalysis.init();
         languageAnalysis(question);
         populateTargetQuestions();
@@ -165,11 +165,13 @@ public class nlpAnalysis {
     public static void languageAnalysis(String query){
         LinkedList<String> depParse= new LinkedList<>();
         CoreDocument document = new CoreDocument(query);
+        Annotation annDocument=new Annotation(query);
+        pipeline.annotate(annDocument);
         pipeline.annotate(document);
-        findPOStags(document);
+        //findPOStags(document);
         findNER(document);
-        constituencyParse(document);
-        depQualities=dependancyParser(query);
+       // constituencyParse(document);
+       // depQualities=dependancyParser(query);
     }
 
     public static void findPOStags(CoreDocument doc){
@@ -183,14 +185,27 @@ public class nlpAnalysis {
         }
     }
     public static void findNER(CoreDocument doc){
+        //CoreMap sentence=doc.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+        StringBuilder combinedEntity=new StringBuilder();
+        String currEntity=null;
         System.out.println("---");
         System.out.println("entities found");
-        String entity="";
-        for (CoreEntityMention em : doc.entityMentions()){
-            System.out.println("\tdetected entity: \t"+em.text()+"\t"+em.entityType());
-            question_entity=em.text();
-
+        for (CoreEntityMention em :doc.entityMentions()){
+            String entityType=em.entityType();
+            String entityText=em.text();
+            if(entityType.equals(currEntity)){
+                combinedEntity.append(", ").append(entityText);
         }
+            else{
+                currEntity=entityType;
+                combinedEntity.append(entityText);
+            }
+          //  System.out.println("\tdetected entity: \t"+em.text()+"\t"+em.entityType());
+          //  question_entity=em.text();
+        }
+        String combinedEntityFinal=combinedEntity.toString().trim();
+        System.out.println("Entity: "+combinedEntityFinal);
+        question_entity=combinedEntityFinal;
        // System.out.println("---");
        // System.out.println("tokens and ner tags");
         // Gives this output: (Where,O) (was,O) (Obama,PERSON) (born,O) (?,O)
