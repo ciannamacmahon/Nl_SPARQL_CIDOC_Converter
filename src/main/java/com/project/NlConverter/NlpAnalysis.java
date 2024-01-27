@@ -35,7 +35,7 @@ public class NlpAnalysis {
         predictTarget();
         NlpAnalysis.pringQual(depQualities);
         Sparql sQuery=new Sparql();
-        sQuery.bodyQuery(question_entity_type,question_entity);
+        sQuery.createSPARQLQuery(question_entity_type,question_entity,subject,predicate,object);
     }
 
 
@@ -85,7 +85,8 @@ public class NlpAnalysis {
         }
         for (String[] array : listOfArray) {
             if (array[0].equals("root")) {
-                predicate=array[2].substring(0, array[2].indexOf("-"));
+                String lemmaVersionPred=lemmaQuery(array[2].substring(0, array[2].indexOf("-")));
+                predicate=lemmaVersionPred;
             }
         }
         if (object.equals("")){
@@ -172,6 +173,19 @@ public class NlpAnalysis {
         findNER(document);
         constituencyParse(document);
         depQualities=dependancyParser(query);
+        String lemmaVersionQuery=lemmaQuery(query);
+
+    }
+    public static String lemmaQuery(String query){
+        CoreDocument doc=new CoreDocument(query);
+        pipeline.annotate(doc);
+        String lemmaVersion="";
+        for(CoreLabel tok:doc.tokens()){
+            System.out.println(String.format("%s\t%s", tok.word(), tok.lemma()));
+            lemmaVersion=tok.lemma();
+        }
+        System.out.println(lemmaVersion);
+        return lemmaVersion;
     }
 
     public static void findPOStags(CoreDocument doc){
@@ -234,6 +248,7 @@ public class NlpAnalysis {
         Annotation doc=new Annotation(query);
         pipeline.annotate(doc);
         CoreMap sentence=doc.get(CoreAnnotations.SentencesAnnotation.class).get(0);
+
         SemanticGraph depGraph =sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
         //Gets the dependancy Parse
         System.out.println("Depenecy parse");

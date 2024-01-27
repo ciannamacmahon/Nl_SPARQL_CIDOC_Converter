@@ -1,10 +1,11 @@
 package com.project.NlConverter;
 
 import java.util.Hashtable;
+import java.util.Map;
 
 
 public class Sparql {
-    public static Hashtable<String, String> cidoc_dict=new Hashtable<>();
+    public static Map<String, String> cidoc_dict=new Hashtable<>();
     public static String prefixQuery="PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
             "        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
@@ -13,32 +14,28 @@ public class Sparql {
             "        PREFIX vt_ont: <https://ont.virtualtreasury.ie/ontology#>\n";
 
 
-    public static void createSPARQLQuery(){
+    public static void createSPARQLQuery(String entityType, String entity,String subj,String pred,String obj)
+    {
+        populateCIDOCDictionary();
+        String select=selectSection();
+        String person=personQuery(entityType,entity);
+        String body=bodyQuery(subj,pred,obj);
         String startSelect="select distinct";
+        String fullQuery=prefixQuery+startSelect+"\n"+select+" Where {"+"\n"+person+"\n"+body+"}";
+        System.out.println(fullQuery);
 
     }
-   // public static void main(String[] args){
-   //     bodyQuery("PERSON","Cianna");
-   // }
 
-    public static String selectSection(String start){
-        String select="?person_name";
-
+    public static String selectSection(){
+        String select="?person_name ?birthDate";
         return select;
     }
 
-    public static String bodyQuery(String entityType, String entity){
-        String nameAppellation="normalized-appellation-surname-forename";
-        String findPerson="?person crm:P1_is_identified_by ?appellation.\n"+
-                "       ?appellation rdfs:label ?personName ";
-        if(entityType.equals("PERSON")){
-            String personN=entity;
-                findPerson=findPerson.replace("?personName","'"+personN+"'.");
-        }
-        else{
-            findPerson=findPerson+"FILTER(CONTAINS(str(?appellation),'"+nameAppellation+"')).";
-        }
-        System.out.println("Person thing------"+findPerson);
+    public static String bodyQuery(String subj,String pred,String obj){
+
+        String cidoc=pred+obj.substring(1,obj.length());
+        String bodyQuery=findCIDOC(cidoc);
+       // System.out.println(cidoc);
 
 
         /*
@@ -46,18 +43,36 @@ public class Sparql {
         ie. if intention is place, see if subject is birth/death. then combine them to get birthPlace and that beomes
         the dictionary lookup term
          */
-
-        String body="Hello";
-        return body;
+        return bodyQuery;
+    }
+    public static String personQuery(String entityType, String entity){
+        String nameAppellation="normalized-appellation-surname-forename";
+        String findPerson="?person crm:P1_is_identified_by ?appellation.\n"+
+                "       ?appellation rdfs:label ?personName ";
+        if(entityType.equals("PERSON")){
+            String personN=entity;
+            findPerson=findPerson.replace("?personName","'"+personN+"'.");
+        }
+        else{
+            findPerson=findPerson+"FILTER(CONTAINS(str(?appellation),'"+nameAppellation+"')).";
+        }
+        System.out.println("Person thing------"+findPerson);
+        return findPerson;
+    }
+    public static String findCIDOC(String cidoc){
+        String mapResult=cidoc_dict.get(cidoc);
+        System.out.println(mapResult);
+        return mapResult;
     }
 
     public static void populateCIDOCDictionary(){
-        cidoc_dict.put("birthDate","?birth rdf:type crm:E67_Birth;\n"+
+
+        cidoc_dict.put("bearDate","?birth rdf:type crm:E67_Birth;\n"+
                 "       crm:P4_has_time-span ?timespanA;\n"+
                 "       crm:P98_brought_into_life ?person.\n " +
                 "       ?timespanA crm:P82a_begin_of_the_begin ?birthDate.");
 
-        cidoc_dict.put("birthPlace","?birth rdf:type crm:E67_Birth;\n" +
+        cidoc_dict.put("bearPlace","?birth rdf:type crm:E67_Birth;\n" +
                 "       crm:P7_took_place_at ?birthPlace.");
 
     }
