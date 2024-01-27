@@ -1,4 +1,5 @@
 package com.project.NlConverter;
+import com.project.NlConverter.Sparql;
 //nlpPipeline.java
 import java.util.LinkedList;
 import java.util.Properties;
@@ -12,10 +13,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-public class nlpAnalysis {
+public class NlpAnalysis {
     public static LinkedList<String> depQualities = new LinkedList<>();
     public static LinkedList<String[]> quest_ans_targets=new LinkedList<>();
     public static String question_entity="";
+    public static String question_entity_type="";
     public static String subject="";
     public static String predicate="";
     public static String object="";
@@ -23,18 +25,22 @@ public class nlpAnalysis {
     public static String targetAnswer="";
     public static String unknown="";
     static StanfordCoreNLP pipeline;
-    public static void main(String[] args) throws FileNotFoundException {
+    public static void main(String args[]) throws FileNotFoundException {
+        Properties props = new Properties();
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
+        pipeline = new StanfordCoreNLP(props);
         String question = "When was Abbadie, Jacques born?";
-        nlpAnalysis.init();
         languageAnalysis(question);
         populateTargetQuestions();
         predictTarget();
-        nlpAnalysis.pringQual(depQualities);
+        NlpAnalysis.pringQual(depQualities);
+        Sparql sQuery=new Sparql();
+        sQuery.bodyQuery(question_entity_type,question_entity);
     }
 
 
     public static void populateTargetQuestions() throws FileNotFoundException{
-        File file= new File("QA_Target.txt");
+        File file= new File("com/project/NlConverter/QA_Target.txt");
         Scanner scanner= new Scanner(file);
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
@@ -155,12 +161,6 @@ public class nlpAnalysis {
         }
         SPOExtraction(qualOfQuery);
     }
-    public static void init()
-    {
-        Properties props = new Properties();
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
-        pipeline = new StanfordCoreNLP(props);
-    }
 
     public static void languageAnalysis(String query){
         LinkedList<String> depParse= new LinkedList<>();
@@ -168,10 +168,10 @@ public class nlpAnalysis {
         Annotation annDocument=new Annotation(query);
         pipeline.annotate(annDocument);
         pipeline.annotate(document);
-        //findPOStags(document);
+        findPOStags(document);
         findNER(document);
-       // constituencyParse(document);
-       // depQualities=dependancyParser(query);
+        constituencyParse(document);
+        depQualities=dependancyParser(query);
     }
 
     public static void findPOStags(CoreDocument doc){
@@ -192,6 +192,7 @@ public class nlpAnalysis {
         System.out.println("entities found");
         for (CoreEntityMention em :doc.entityMentions()){
             String entityType=em.entityType();
+            question_entity_type=em.entityType();
             String entityText=em.text();
             if(entityType.equals(currEntity)){
                 combinedEntity.append(", ").append(entityText);
