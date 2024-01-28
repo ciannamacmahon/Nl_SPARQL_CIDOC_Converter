@@ -21,8 +21,6 @@ public class EndpointExecution {
                 "                     ?person crm:P1_is_identified_by ?appellation.\n" +
                 "                     ?appellation rdfs:label 'Abbadie, Jacques'.\n" +
                 "  \n" +
-                "  ?birth rdf:type crm:E67_Birth;\n" +
-                "     crm:P4_has_time-span ?timespanB;\n" +
                 "     crm:P98_brought_into_life ?person.\n" +
                 "\t\t ?timespanB crm:P82a_begin_of_the_begin ?birthDate.\n" +
                 "\n" +

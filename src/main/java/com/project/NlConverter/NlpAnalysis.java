@@ -29,13 +29,16 @@ public class NlpAnalysis {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
         pipeline = new StanfordCoreNLP(props);
-        String question = "When was Abbadie, Jacques born?";
+        String question = "Where was Abbadie, Jacques born?";
         languageAnalysis(question);
         populateTargetQuestions();
         predictTarget();
         NlpAnalysis.pringQual(depQualities);
         Sparql sQuery=new Sparql();
-        sQuery.createSPARQLQuery(question_entity_type,question_entity,subject,predicate,object);
+        String sparlCIDOCQuery=sQuery.createSPARQLQuery(question_entity_type,question_entity,subject,predicate,object);
+        //if endpoint could compile
+       // EndpointExecution sparqlEndpoint=new EndpointExecution();
+      //  sparqlEndpoint.searchGraph(sparlCIDOCQuery);
     }
 
 

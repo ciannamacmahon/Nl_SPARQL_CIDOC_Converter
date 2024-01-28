@@ -14,7 +14,7 @@ public class Sparql {
             "        PREFIX vt_ont: <https://ont.virtualtreasury.ie/ontology#>\n";
 
 
-    public static void createSPARQLQuery(String entityType, String entity,String subj,String pred,String obj)
+    public static String createSPARQLQuery(String entityType, String entity,String subj,String pred,String obj)
     {
         populateCIDOCDictionary();
         String select=selectSection();
@@ -23,6 +23,7 @@ public class Sparql {
         String startSelect="select distinct";
         String fullQuery=prefixQuery+startSelect+"\n"+select+" Where {"+"\n"+person+"\n"+body+"}";
         System.out.println(fullQuery);
+        return fullQuery;
 
     }
 
