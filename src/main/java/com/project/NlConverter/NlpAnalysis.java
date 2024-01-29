@@ -29,7 +29,7 @@ public class NlpAnalysis {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
         pipeline = new StanfordCoreNLP(props);
-        String question = "Tell me about Abbadie, Jacques";
+        String question = "When did OHartegan, Matthew die?";
         languageAnalysis(question);
         populateTargetQuestions();
         predictTarget();
@@ -37,13 +37,13 @@ public class NlpAnalysis {
         Sparql sQuery=new Sparql();
         String sparlCIDOCQuery=sQuery.createSPARQLQuery(question_entity_type,question_entity,subject,predicate,object);
         //if endpoint could compile
-       // EndpointExecution sparqlEndpoint=new EndpointExecution();
-      //  sparqlEndpoint.searchGraph(sparlCIDOCQuery);
+        EndpointExecution sparqlEndpoint=new EndpointExecution();
+        sparqlEndpoint.searchGraph(sparlCIDOCQuery);
     }
 
 
     public static void populateTargetQuestions() throws FileNotFoundException{
-        File file= new File("com/project/NlConverter/QA_Target.txt");
+        File file= new File("src/main/java/com/project/NlConverter/QA_Target.txt");
         Scanner scanner= new Scanner(file);
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
