@@ -76,5 +76,13 @@ public class Sparql {
         cidoc_dict.put("bearPlace","?birth rdf:type crm:E67_Birth;\n" +
                 "       crm:P7_took_place_at ?birthPlace.");
 
+        cidoc_dict.put("dieDate","?death rdf:type crm:E69_Death;\n"+
+        "       crm:P4_has_time-span ?timespanA;\n"+
+                "       crm:P93_took_out_of_existence ?person.\n " +
+                "       ?timespanA crm:P82b_end_of_the_end ?deathDate.");
+
+        cidoc_dict.put("diePlace","?death rdf:type crm:E69_Death;\n"+
+                "       crm:P7_took_place_at ?deathPLace."  );
+
     }
 }

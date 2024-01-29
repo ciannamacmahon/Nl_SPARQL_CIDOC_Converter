@@ -1,10 +1,11 @@
 package com.project.NlConverter;
+
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.query.ResultSetFormatter;
+        import org.apache.jena.query.ResultSet;
+        import org.apache.jena.query.ResultSetFormatter;
 
-import java.util.Iterator;
+        import java.util.Iterator;
 
 public class EndpointExecution {
 
@@ -21,24 +22,28 @@ public class EndpointExecution {
                 "                     ?person crm:P1_is_identified_by ?appellation.\n" +
                 "                     ?appellation rdfs:label 'Abbadie, Jacques'.\n" +
                 "  \n" +
-                "     crm:P98_brought_into_life ?person.\n" +
-                "\t\t ?timespanB crm:P82a_begin_of_the_begin ?birthDate.\n" +
+                "     ?birth rdf:type crm:E67_Birth;\n" +
+                "            crm:P4_has_time-span ?timespanA;\n" +
+                "            crm:P98_brought_into_life ?person.\n" +
+                "                 ?timespanB crm:P82a_begin_of_the_begin ?birthDate.\n" +
                 "\n" +
                 "  }";
         searchGraph(sparqlQuery);
     }
 
     public static void searchGraph(String sparqlString) {
+        System.out.println("---------------------------------");
+        System.out.println("SPARQL Query: "+sparqlString);
         String sparqlEndpoint = "https://blazegraph.virtualtreasury.ie/blazegraph/namespace/b2022/sparql";
-        QueryExecution q= QueryExecution.service(sparqlEndpoint,sparqlString);
-        ResultSet result=q.execSelect();
-        while (result.hasNext()){
-            QuerySolution solution= result.next();
-            Iterator<String> variables= solution.varNames();
-            while(variables.hasNext()){
-                String selectVariable=variables.next();
-                String resultVariable=solution.get(selectVariable).toString();
-                System.out.println(selectVariable+": "+resultVariable);
+        QueryExecution q = QueryExecution.service(sparqlEndpoint, sparqlString);
+        ResultSet result = q.execSelect();
+        while (result.hasNext()) {
+            QuerySolution solution = result.next();
+            Iterator<String> variables = solution.varNames();
+            while (variables.hasNext()) {
+                String selectVariable = variables.next();
+                String resultVariable = solution.get(selectVariable).toString();
+                System.out.println(selectVariable + ": " + resultVariable);
             }
         }
 

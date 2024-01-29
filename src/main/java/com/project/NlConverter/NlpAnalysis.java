@@ -29,7 +29,7 @@ public class NlpAnalysis {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
         pipeline = new StanfordCoreNLP(props);
-        String question = "Where was Abbadie, Jacques born?";
+        String question = "Tell me about Abbadie, Jacques";
         languageAnalysis(question);
         populateTargetQuestions();
         predictTarget();

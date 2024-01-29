@@ -8,13 +8,15 @@
 		<version>3.2.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.project</groupId>
-	<artifactId>NlConverter</artifactId>
+	<groupId>com.project.NlConverter</groupId>
+	<artifactId>NlSparqlConverter</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>NlConverter</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>17</java.version>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -41,26 +43,15 @@
 			<classifier>models</classifier>
 		</dependency>
 
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>apache-jena-libs</artifactId>
-			<version>4.9.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena-commonsrdf</artifactId>
-			<version>4.9.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.jena</groupId>
-			<artifactId>jena</artifactId>
-			<version>4.9.0</version>
-		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.jena/jena-arq -->
 		<dependency>
 			<groupId>org.apache.jena</groupId>
 			<artifactId>jena-arq</artifactId>
-			<version>4.9.0</version>
+			<version>4.10.0</version>
 		</dependency>
+
+
+
 	</dependencies>
 
 	<build>
@@ -68,6 +59,21 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.1.1</version>
+				<configuration>
+					<mainClass>com.project.NlConverter.EndpointExecution</mainClass>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
