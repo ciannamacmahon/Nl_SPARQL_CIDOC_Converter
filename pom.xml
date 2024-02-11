@@ -147,7 +147,7 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>3.1.1</version>
 				<configuration>
-					<mainClass>com.project.NlConverter.NlpAnalysis</mainClass>
+					<mainClass>com.project.NlConverter.NLG</mainClass>
 				</configuration>
 				<executions>
 					<execution>

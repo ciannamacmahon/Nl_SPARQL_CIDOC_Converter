@@ -19,13 +19,13 @@ public class Sparql {
         populateCIDOCDictionary();
 
 
-        // String select=selectSection(pred,obj);
+        String select=selectSection(pred,obj);
         String person=personQuery(entityType,entity);
         String body=bodyQuery(subj,pred,obj);
         String startSelect="select distinct";
-      ///  String fullQuery=prefixQuery+startSelect+"\n"+select+" Where {"+"\n"+person+"\n"+body+"} Limit 5";
-      ///  System.out.println(fullQuery);
-        return "fullQuery";
+        String fullQuery=prefixQuery+startSelect+"\n"+select+" Where {"+"\n"+person+"\n"+body+"} Limit 5";
+        System.out.println(fullQuery);
+        return fullQuery;
 
     }
 
