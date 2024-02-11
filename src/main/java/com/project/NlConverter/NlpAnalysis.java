@@ -1,6 +1,7 @@
 package com.project.NlConverter;
 import com.project.NlConverter.Sparql;
 //nlpPipeline.java
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Properties;
 
@@ -25,20 +26,32 @@ public class NlpAnalysis {
     public static String targetAnswer="";
     public static String unknown="";
     static StanfordCoreNLP pipeline;
+    public static String[] QuestionArray=new String[6];
+
+    public static void QuestionList(){
+        QuestionArray[0]="When";
+        QuestionArray[1]="Where";
+        QuestionArray[2]="Who";
+        QuestionArray[3]="How much";
+        QuestionArray[4]="How many";
+        QuestionArray[5]="Count";
+
+    }
     public static void main(String args[]) throws FileNotFoundException {
+       // QuestionList();
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
         pipeline = new StanfordCoreNLP(props);
-        String question = "When did OHartegan, Matthew die?";
+        String question = "Who was born in 1700?";
         languageAnalysis(question);
         populateTargetQuestions();
         predictTarget();
         NlpAnalysis.pringQual(depQualities);
         Sparql sQuery=new Sparql();
         String sparlCIDOCQuery=sQuery.createSPARQLQuery(question_entity_type,question_entity,subject,predicate,object);
-        //if endpoint could compile
-        EndpointExecution sparqlEndpoint=new EndpointExecution();
-        sparqlEndpoint.searchGraph(sparlCIDOCQuery);
+      //  //if endpoint could compile
+      //  EndpointExecution sparqlEndpoint=new EndpointExecution();
+      //  sparqlEndpoint.searchGraph(sparlCIDOCQuery);
     }
 
 
@@ -82,19 +95,17 @@ public class NlpAnalysis {
         if( unknown.equals("subject")){
             //entity is the object of the question
             object=question_entity;
+            subject=targetAnswer;
         }
         else if(unknown.equals("object")){
             subject=question_entity;
+            object=targetAnswer;
         }
         for (String[] array : listOfArray) {
             if (array[0].equals("root")) {
                 String lemmaVersionPred=lemmaQuery(array[2].substring(0, array[2].indexOf("-")));
                 predicate=lemmaVersionPred;
             }
-        }
-        if (object.equals("")){
-            object=targetAnswer;
-
         }
         System.out.println("Subject: "+ subject+ " Predicate: "+predicate+ " Object: "+object);
 
@@ -168,16 +179,35 @@ public class NlpAnalysis {
 
     public static void languageAnalysis(String query){
         LinkedList<String> depParse= new LinkedList<>();
+        //String withoutQ=removeQ(query);
         CoreDocument document = new CoreDocument(query);
         Annotation annDocument=new Annotation(query);
         pipeline.annotate(annDocument);
         pipeline.annotate(document);
-        findPOStags(document);
         findNER(document);
-        constituencyParse(document);
+        findPOStags(document);
+       // constituencyParse(document);
         depQualities=dependancyParser(query);
-        String lemmaVersionQuery=lemmaQuery(query);
+      //  String lemmaVersionQuery=lemmaQuery(query);
 
+    }
+    public static String removeQ(String query){
+        String[] ques=query.split(" ");
+        for (String Question:QuestionArray){
+            System.out.println(Question + "bgbg "+ ques[0]);
+            if (Question.equals(ques[0])){
+                ques= Arrays.copyOfRange(ques,1,ques.length);
+                StringBuilder sentenceBuilder = new StringBuilder();
+                for (String word : ques) {
+                    sentenceBuilder.append(word).append(" ");
+                }
+                // Remove trailing space and print the sentence
+                String sentence = sentenceBuilder.toString().trim();
+                System.out.println(sentence);
+                return sentence;
+            }
+        }
+        return"";
     }
     public static String lemmaQuery(String query){
         CoreDocument doc=new CoreDocument(query);

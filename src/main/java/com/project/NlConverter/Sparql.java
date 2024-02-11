@@ -22,7 +22,7 @@ public class Sparql {
         String body=bodyQuery(subj,pred,obj);
         String startSelect="select distinct";
         String fullQuery=prefixQuery+startSelect+"\n"+select+" Where {"+"\n"+person+"\n"+body+"} Limit 5";
-       // System.out.println(fullQuery);
+        System.out.println(fullQuery);
         return fullQuery;
 
     }
