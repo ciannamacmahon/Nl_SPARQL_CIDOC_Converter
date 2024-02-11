@@ -17,34 +17,54 @@ public class Sparql {
     public static String createSPARQLQuery(String entityType, String entity,String subj,String pred,String obj)
     {
         populateCIDOCDictionary();
-        String select=selectSection(pred,obj);
+
+
+        // String select=selectSection(pred,obj);
         String person=personQuery(entityType,entity);
         String body=bodyQuery(subj,pred,obj);
         String startSelect="select distinct";
-        String fullQuery=prefixQuery+startSelect+"\n"+select+" Where {"+"\n"+person+"\n"+body+"} Limit 5";
-        System.out.println(fullQuery);
-        return fullQuery;
+      ///  String fullQuery=prefixQuery+startSelect+"\n"+select+" Where {"+"\n"+person+"\n"+body+"} Limit 5";
+      ///  System.out.println(fullQuery);
+        return "fullQuery";
 
     }
 
     public static String selectSection(String pred,String obj){
+        // based on whats the target
         String finalSelect="?"+pred+obj.substring(1,obj.length());
         return finalSelect;
     }
 
     public static String bodyQuery(String subj,String pred,String obj){
+        // whats the target?
+        String cidoc="";
+        String bodySPARQLQuery="";
+        if(subj.contains("?")){
+            // subject is the target
+            if (obj.matches("\\d+")){
+                cidoc=pred+"Date";
+            }
+            else{
+                cidoc=pred+"Place";
+            }
 
-        String cidoc=pred+obj.substring(1,obj.length());
-        String bodyQuery=findCIDOC(cidoc);
-       // System.out.println(cidoc);
+        }
+        else if (obj.contains("?")){
+            //object is the target
+            cidoc=pred+obj.substring(1,obj.length());
+        }
+        bodySPARQLQuery=findCIDOC(cidoc);
 
 
-        /*
-        Have to do same as i did above but for extracting the dictionary terms to match the intention of the question
-        ie. if intention is place, see if subject is birth/death. then combine them to get birthPlace and that beomes
-        the dictionary lookup term
-         */
-        return bodyQuery;
+
+        System.out.println(cidoc);
+        System.out.println(bodySPARQLQuery);
+        return bodySPARQLQuery;
+        // after this it should then be determined what substitution needs to be made based on the target of the question
+        // Eg. Object target
+        //    - need to subsitute either the date/place into the cidoc notation
+        // Subject target
+        //     - need to subsitute the name of the person
     }
     public static String personQuery(String entityType, String entity){
         String nameAppellation="normalized-appellation-surname-forename";
@@ -56,6 +76,9 @@ public class Sparql {
         }
         else{
             findPerson=findPerson+"FILTER(CONTAINS(str(?appellation),'"+nameAppellation+"')).";
+        }
+        if(entityType.equals("DATE")){
+
         }
      //   System.out.println("Person thing------"+findPerson);
         return findPerson;
