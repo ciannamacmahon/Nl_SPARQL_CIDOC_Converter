@@ -42,7 +42,7 @@ public class NlpAnalysis {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
         pipeline = new StanfordCoreNLP(props);
-        String question = "When was Abbadie, Jacques born?";
+        String question = "Who died on 1727-09-25? ";
         languageAnalysis(question);
         populateTargetQuestions();
         predictTarget();
@@ -234,33 +234,27 @@ public class NlpAnalysis {
     public static void findNER(CoreDocument doc){
         //CoreMap sentence=doc.get(CoreAnnotations.SentencesAnnotation.class).get(0);
         StringBuilder combinedEntity=new StringBuilder();
-        String currEntity=null;
+        String currEntityType=null;
         System.out.println("---");
         System.out.println("entities found");
         for (CoreEntityMention em :doc.entityMentions()){
             String entityType=em.entityType();
             question_entity_type=em.entityType();
             String entityText=em.text();
-            if(entityType.equals(currEntity)){
+            if(entityType.equals(currEntityType)){
                 combinedEntity.append(", ").append(entityText);
         }
             else{
-                currEntity=entityType;
+                currEntityType=entityType;
                 combinedEntity.append(entityText);
             }
           //  System.out.println("\tdetected entity: \t"+em.text()+"\t"+em.entityType());
           //  question_entity=em.text();
         }
         String combinedEntityFinal=combinedEntity.toString().trim();
-        System.out.println("Entity: "+combinedEntityFinal);
         question_entity=combinedEntityFinal;
-       // System.out.println("---");
-       // System.out.println("tokens and ner tags");
-        // Gives this output: (Where,O) (was,O) (Obama,PERSON) (born,O) (?,O)
-      //  String tokensAndNERTags = doc.tokens().stream().map(token -> "("+token.word()+","+token.ner()+")").collect(
-      //          Collectors.joining(" "));
-     //   System.out.println(tokensAndNERTags);
-        //   return entity;
+        System.out.println("Entity: "+question_entity);
+        System.out.println("Entity type: "+question_entity_type);
 
     }
 

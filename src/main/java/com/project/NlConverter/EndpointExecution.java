@@ -32,8 +32,6 @@ public class EndpointExecution {
     }
 
     public static void searchGraph(String sparqlString) {
-        System.out.println("---------------------------------");
-        System.out.println("SPARQL Query: "+sparqlString);
         String sparqlEndpoint = "https://blazegraph.virtualtreasury.ie/blazegraph/namespace/b2022/sparql";
         QueryExecution q = QueryExecution.service(sparqlEndpoint, sparqlString);
         ResultSet result = q.execSelect();
