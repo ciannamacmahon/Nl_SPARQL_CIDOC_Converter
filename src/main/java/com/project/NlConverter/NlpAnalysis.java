@@ -42,7 +42,7 @@ public class NlpAnalysis {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
         pipeline = new StanfordCoreNLP(props);
-        String question = "Who died on 1727-09-25? ";
+        String question = "Who was born in Dublin? ";
         languageAnalysis(question);
         populateTargetQuestions();
         predictTarget();

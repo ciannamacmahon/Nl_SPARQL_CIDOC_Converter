@@ -103,9 +103,19 @@ public class Sparql {
 
 
             }
+            else if (entityType.contains("CITY")){
+                bodySPARQLQuery=placeQuery(bodySPARQLQuery,entity);
+            }
 
         }
         return bodySPARQLQuery;
+
+    }
+    public static String dateQuery(){
+        return "empty";
+    }
+    public static String placeQuery(String bodyQuery,String enity){
+        return bodyQuery=bodyQuery.replace("?bearPlaceName","'"+enity+"'");
 
     }
 
@@ -124,7 +134,7 @@ public class Sparql {
     public static String personQuery(String entityType, String entity){
         String nameAppellation="normalized-appellation-surname-forename";
         String findPerson="?person crm:P1_is_identified_by ?appellation.\n"+
-                "       ?appellation rdfs:label ?personName ";
+                "       ?appellation rdfs:label ?personName. ";
         if(entityType.equals("PERSON")){
             String []personN=entity.split(" ");
             String surname_forename=personN[1]+", "+personN[0];
@@ -149,8 +159,9 @@ public class Sparql {
                 "       ?timespanA crm:P82a_begin_of_the_begin ?bearDate.");
 
         cidoc_dict.put("bearPlaceName","?birth rdf:type crm:E67_Birth;\n" +
-                "       crm:P7_took_place_at ?bearPlace." +
-                "?bearPlace crm:P1_is_identified_by ?bearPlaceLink." +
+                "       crm:P7_took_place_at ?bearPlace;\n" +
+                "       crm:98_brought_into_life ?person.\n" +
+                "?bearPlace crm:P1_is_identified_by ?bearPlaceLink.\n" +
                 "?bearPlaceLink rdfs:label ?bearPlaceName.");
 
         cidoc_dict.put("dieDate","?death rdf:type crm:E69_Death;\n"+
@@ -159,7 +170,8 @@ public class Sparql {
                 "       ?timespanA crm:P82b_end_of_the_end ?dieDate.");
 
         cidoc_dict.put("diePlaceName","?death rdf:type crm:E69_Death;\n"+
-                "       crm:P7_took_place_at ?diePlace."+
+                "       crm:P7_took_place_at ?diePlace;" +
+                "       crm:P93_took_out_of_existence ?person."+
                 "?diePlace crm:P1_is_identified_by ?diePlaceLink." +
                 "?diePlaceLink rdfs:label ?diePlaceName.");
 
