@@ -160,7 +160,7 @@ public class Sparql {
 
         cidoc_dict.put("bearPlaceName","?birth rdf:type crm:E67_Birth;\n" +
                 "       crm:P7_took_place_at ?bearPlace;\n" +
-                "       crm:98_brought_into_life ?person.\n" +
+                "       crm:P98_brought_into_life ?person.\n" +
                 "?bearPlace crm:P1_is_identified_by ?bearPlaceLink.\n" +
                 "?bearPlaceLink rdfs:label ?bearPlaceName.");
 
