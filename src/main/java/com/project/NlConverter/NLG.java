@@ -16,7 +16,6 @@ public class NLG {
 
         try{
             URL obj=new URL(url);
-            JSONObject respQ=null;
             HttpURLConnection connection=(HttpURLConnection)obj.openConnection();
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Authorization","Bearer "+API_Key);

@@ -164,7 +164,6 @@ public class NlpAnalysis {
     }
 
     public static void languageAnalysis(String query){
-        LinkedList<String> depParse= new LinkedList<>();
         //String withoutQ=removeQ(query);
         CoreDocument document = new CoreDocument(query);
         Annotation annDocument=new Annotation(query);
@@ -208,7 +207,6 @@ public class NlpAnalysis {
     }
 
     public static void findPOStags(CoreDocument doc){
-        CoreSentence sentence=doc.sentences().get(0);
         //Method 1
         for(CoreLabel token:doc.tokens()){
             System.out.println(String.format("%s\t%s", token.word(),token.tag()));
@@ -253,7 +251,6 @@ public class NlpAnalysis {
         System.out.println();
 
     }
-    @SuppressWarnings("unchecked")
     public static LinkedList<String> dependancyParser(String query)
     {
         LinkedList<String> depParse= new LinkedList<>();

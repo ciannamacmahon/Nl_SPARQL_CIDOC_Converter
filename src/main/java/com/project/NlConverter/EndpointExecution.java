@@ -3,7 +3,6 @@ package com.project.NlConverter;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QuerySolution;
         import org.apache.jena.query.ResultSet;
-        import org.apache.jena.query.ResultSetFormatter;
 
         import java.util.Iterator;
 
