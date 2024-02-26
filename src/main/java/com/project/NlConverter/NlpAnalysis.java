@@ -1,5 +1,4 @@
 package com.project.NlConverter;
-import com.project.NlConverter.Sparql;
 //nlpPipeline.java
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -37,21 +36,20 @@ public class NlpAnalysis {
         QuestionArray[5]="Count";
 
     }
-    public static void main(String args[]) throws FileNotFoundException {
+    public static void entryPoint(String userInputQuery) throws FileNotFoundException {
        // QuestionList();
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
         pipeline = new StanfordCoreNLP(props);
-        String question = "Who was born in Dublin? ";
-        languageAnalysis(question);
+        //String question = "Who was born in Dublin? ";
+        languageAnalysis(userInputQuery);
+        System.out.println(userInputQuery);
         populateTargetQuestions();
         predictTarget();
         NlpAnalysis.pringQual(depQualities);
-        Sparql sQuery=new Sparql();
-        String sparlCIDOCQuery=sQuery.createSPARQLQuery(question_entity_type,question_entity,subject,predicate,object);
+        String sparlCIDOCQuery=Sparql.createSPARQLQuery(question_entity_type,question_entity,subject,predicate,object);
       //  //if endpoint could compile
-        EndpointExecution sparqlEndpoint=new EndpointExecution();
-        sparqlEndpoint.searchGraph(sparlCIDOCQuery);
+        EndpointExecution.searchGraph(sparlCIDOCQuery);
     }
 
 
@@ -108,18 +106,6 @@ public class NlpAnalysis {
             }
         }
         System.out.println("Subject: "+ subject+ " Predicate: "+predicate+ " Object: "+object);
-
-
-// This will be following the grammar rules shown in indeed article
-        //   for (String[] array : listOfArray) {
-        //   if (conatinsNsubj(array)){
-        //       System.out.println("its nsubj");
-
-        //    }
-        //    else { //subj
-        //        System.out.println("its nsubjpass");
-        //    }
-
     }
     public static Boolean conatinsNsubj(String []array) {
         for (String element : array) {
