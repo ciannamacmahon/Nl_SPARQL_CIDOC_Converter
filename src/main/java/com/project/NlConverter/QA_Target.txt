@@ -2,3 +2,4 @@ When, ?Date
 Where, ?PlaceName
 Who, ?Person
 What, ?variable
+How many, ?variable

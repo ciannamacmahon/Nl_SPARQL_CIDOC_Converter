@@ -2,6 +2,7 @@ package com.project.NlConverter;
 //nlpPipeline.java
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 import edu.stanford.nlp.pipeline.*;
@@ -16,16 +17,17 @@ import java.util.Scanner;
 public class NlpAnalysis {
     public static LinkedList<String> depQualities = new LinkedList<>();
     public static LinkedList<String[]> quest_ans_targets=new LinkedList<>();
-    public static String question_entity="";
-    public static String question_entity_type="";
+    public static LinkedList<String> question_entity=new LinkedList<>();
+    public static LinkedList<String> question_entity_type=new LinkedList<>();
     public static String subject="";
     public static String predicate="";
-    public static String object="";
+    public static LinkedList <String> object=new LinkedList<>();
     public static String questionWord="";
     public static String targetAnswer="";
     public static String unknown="";
     static StanfordCoreNLP pipeline;
     public static String[] QuestionArray=new String[6];
+    public static boolean containsFilter=false;
 
     public static void QuestionList(){
         QuestionArray[0]="When";
@@ -35,6 +37,11 @@ public class NlpAnalysis {
         QuestionArray[4]="How many";
         QuestionArray[5]="Count";
 
+    }
+
+    public static void main(String args[]) throws FileNotFoundException{
+
+        entryPoint("How many people were born between 1600-01-01 and 1610-01-01");
     }
     public static void entryPoint(String userInputQuery) throws FileNotFoundException {
        // QuestionList();
@@ -47,9 +54,9 @@ public class NlpAnalysis {
         populateTargetQuestions();
         predictTarget();
         NlpAnalysis.pringQual(depQualities);
-        String sparlCIDOCQuery=Sparql.createSPARQLQuery(question_entity_type,question_entity,subject,predicate,object);
+        String sparlCIDOCQuery=Sparql.createSPARQLQuery(question_entity_type,question_entity,questionWord,subject,predicate,object,containsFilter);
       //  //if endpoint could compile
-        EndpointExecution.searchGraph(sparlCIDOCQuery);
+     //   EndpointExecution.searchGraph(sparlCIDOCQuery);
     }
 
 
@@ -74,7 +81,7 @@ public class NlpAnalysis {
                 targetAnswer=q[1];
             }
         }
-        if (questionWord.equals("Who")){
+        if (questionWord.equals("Who")|| questionWord.equals("How many")|| questionWord.equals("Count")){
             unknown="subject";
         }
         else if (questionWord.equals("When")||questionWord.equals("Where")){
@@ -87,17 +94,22 @@ public class NlpAnalysis {
         //More complex questions with more than one of these
         // LinkedList<String> subject = new LinkedList<>();
         //  LinkedList<String> predicate = new LinkedList<>();
-        //  LinkedList<String> object = new LinkedList<>();
+        // LinkedList<String> object = new LinkedList<>();
 
         // this extracts it using the root as the predicate and the subject is the entity extraction
         if( unknown.equals("subject")){
             //entity is the object of the question
-            object=question_entity;
+            for(String entity:question_entity){
+                object.add(entity);
+            }
+           // System.out.print("objects: "+object.get(0));
             subject=targetAnswer;
         }
         else if(unknown.equals("object")){
-            subject=question_entity;
-            object=targetAnswer;
+            for(String entity:question_entity){
+                subject=entity;
+            }
+            object.add(targetAnswer);
         }
         for (String[] array : listOfArray) {
             if (array[0].equals("root")) {
@@ -157,7 +169,8 @@ public class NlpAnalysis {
     //Test method; each item in the list is the characteristic of that word
     public static void pringQual(LinkedList <String>qualOfQuery){
         for (String line:qualOfQuery){
-            System.out.println(line);
+
+            System.out.println("sgfsdf \n"+line+"\ndfgdg");
 
         }
         SPOExtraction(qualOfQuery);
@@ -208,12 +221,29 @@ public class NlpAnalysis {
 
     public static void findPOStags(CoreDocument doc){
         //Method 1
-        for(CoreLabel token:doc.tokens()){
-            System.out.println(String.format("%s\t%s", token.word(),token.tag()));
-            if(token.tag().contains("W")){
-                questionWord=token.word();
+        List<CoreLabel> tokens=doc.tokens();
+        int y=0;
+        for(int i=0; i<tokens.size()-1;i++){
+            CoreLabel firstToken=tokens.get(i);
+            y=i+1;
+            CoreLabel nextToken=tokens.get(y);
+            System.out.println(String.format("%s\t%s", firstToken.word(),firstToken.tag()));
+            if(firstToken.tag().contains("W")){
+                if(nextToken.word().contains("many")||nextToken.word().contains("much")){
+                    questionWord= firstToken.word()+" "+nextToken.word();
+                }
+                else{
+                    questionWord=firstToken.word();
+                }
+            }
+            else if (firstToken.word().contains("between")||firstToken.word().contains("within")){
+                containsFilter=true;
+            }
+            else if (firstToken.tag().contains("comp")){
+                //make this and next word into one
             }
         }
+        System.out.println("question: "+questionWord);
     }
     public static void findNER(CoreDocument doc){
         //CoreMap sentence=doc.get(CoreAnnotations.SentencesAnnotation.class).get(0);
@@ -223,20 +253,29 @@ public class NlpAnalysis {
         System.out.println("entities found");
         for (CoreEntityMention em :doc.entityMentions()){
             String entityType=em.entityType();
-            question_entity_type=em.entityType();
             String entityText=em.text();
             if(entityType.equals(currEntityType)){
-                combinedEntity.append(", ").append(entityText);
+                // combinedEntity.append(", ").append(entityText); person
+                question_entity.add(entityText);
         }
             else{
+                question_entity_type.add(entityType);
+                question_entity.add(entityText);
                 currEntityType=entityType;
                 combinedEntity.append(entityText);
+                if(question_entity_type.size()>1){
+                    containsFilter=true;
+                }
             }
           //  System.out.println("\tdetected entity: \t"+em.text()+"\t"+em.entityType());
           //  question_entity=em.text();
         }
-        String combinedEntityFinal=combinedEntity.toString().trim();
-        question_entity=combinedEntityFinal;
+     //   String combinedEntityFinal=combinedEntity.toString().trim();
+     ////   System.out.println("tester: "+combinedEntityFinal);
+     //   if(combinedEntityFinal.contains("and")){
+    //        combinedEntityFinal.replace("and", "");
+    //    }
+    //    question_entity=combinedEntityFinal;
         System.out.println("Entity: "+question_entity);
         System.out.println("Entity type: "+question_entity_type);
 
