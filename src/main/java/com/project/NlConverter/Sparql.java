@@ -210,3 +210,31 @@ public class Sparql {
 
     
 }
+/*
+ * PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX crm: <http://erlangen-crm.org/current/>
+        PREFIX vt: <https://kb.virtualtreasury.ie/>
+        PREFIX vt_ont: <https://ont.virtualtreasury.ie/ontology#>
+select(count(distinct ?personName)as ?names )
+Where {
+?person crm:P1_is_identified_by ?appellation.
+       ?appellation rdfs:label ?personName. FILTER(CONTAINS(str(?appellation),'normalized-appellation-surname-forename')).
+  
+  ?birth rdf:type crm:E67_Birth;
+         crm:P7_took_place_at ?place;
+         crm:P98_brought_into_life ?person.
+  ?place crm:P1_is_identified_by ?bearPlaceLink.
+  ?bearPlaceLink rdfs:label 'Dublin'.
+  
+  ?birth rdf:type crm:E67_Birth;
+                     crm:P4_has_time-span ?timespanB;
+                     crm:P98_brought_into_life ?person.
+  
+  ?timespanB crm:P82a_begin_of_the_begin ?start_date.
+  ?timespanD crm:P82b_end_of_the_end ?end_date.
+  FILTER (?start_date > "1600-01-01"^^xsd:date).
+  FILTER (?start_date <= "1640-02-01"^^xsd:date).
+}
+ */
