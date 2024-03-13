@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
+import org.checkerframework.checker.units.qual.s;
+
 public class NlpAnalysis {
     public static LinkedList<String> depQualities = new LinkedList<>();
     public static LinkedList<String[]> quest_ans_targets=new LinkedList<>();
@@ -28,6 +30,7 @@ public class NlpAnalysis {
     static StanfordCoreNLP pipeline;
     public static String[] QuestionArray=new String[6];
     public static boolean containsFilter=false;
+    public static String filterCondition="";
 
     public static void QuestionList(){
         QuestionArray[0]="When";
@@ -41,7 +44,7 @@ public class NlpAnalysis {
 
     public static void main(String args[]) throws FileNotFoundException{
 
-        entryPoint("How many people were born between 1600-01-01 and 1610-01-01");
+        entryPoint("How many people were born between 1600 and 1601?");
     }
     public static void entryPoint(String userInputQuery) throws FileNotFoundException {
        // QuestionList();
@@ -54,9 +57,10 @@ public class NlpAnalysis {
         populateTargetQuestions();
         predictTarget();
         NlpAnalysis.pringQual(depQualities);
-        String sparlCIDOCQuery=Sparql.createSPARQLQuery(question_entity_type,question_entity,questionWord,subject,predicate,object,containsFilter);
+        object.remove("and");
+        String sparlCIDOCQuery=Sparql.createSPARQLQuery(question_entity_type,question_entity,questionWord,subject,predicate,object,containsFilter,filterCondition);
       //  //if endpoint could compile
-     //   EndpointExecution.searchGraph(sparlCIDOCQuery);
+       // EndpointExecution.searchGraph(sparlCIDOCQuery);
     }
 
 
@@ -168,9 +172,11 @@ public class NlpAnalysis {
 
     //Test method; each item in the list is the characteristic of that word
     public static void pringQual(LinkedList <String>qualOfQuery){
+        System.out.println("Depenecy parse");
+
         for (String line:qualOfQuery){
 
-            System.out.println("sgfsdf \n"+line+"\ndfgdg");
+            System.out.println("\n"+line);
 
         }
         SPOExtraction(qualOfQuery);
@@ -189,24 +195,7 @@ public class NlpAnalysis {
       //  String lemmaVersionQuery=lemmaQuery(query);
 
     }
-    public static String removeQ(String query){
-        String[] ques=query.split(" ");
-        for (String Question:QuestionArray){
-            System.out.println(Question + "bgbg "+ ques[0]);
-            if (Question.equals(ques[0])){
-                ques= Arrays.copyOfRange(ques,1,ques.length);
-                StringBuilder sentenceBuilder = new StringBuilder();
-                for (String word : ques) {
-                    sentenceBuilder.append(word).append(" ");
-                }
-                // Remove trailing space and print the sentence
-                String sentence = sentenceBuilder.toString().trim();
-                System.out.println(sentence);
-                return sentence;
-            }
-        }
-        return"";
-    }
+    
     public static String lemmaQuery(String query){
         CoreDocument doc=new CoreDocument(query);
         pipeline.annotate(doc);
@@ -218,7 +207,8 @@ public class NlpAnalysis {
         System.out.println(lemmaVersion);
         return lemmaVersion;
     }
-
+// can also be used to find compound words as the tag will be compound
+// again dep parsey was preferred as provides the link in the display
     public static void findPOStags(CoreDocument doc){
         //Method 1
         List<CoreLabel> tokens=doc.tokens();
@@ -236,12 +226,7 @@ public class NlpAnalysis {
                     questionWord=firstToken.word();
                 }
             }
-            else if (firstToken.word().contains("between")||firstToken.word().contains("within")){
-                containsFilter=true;
-            }
-            else if (firstToken.tag().contains("comp")){
-                //make this and next word into one
-            }
+            
         }
         System.out.println("question: "+questionWord);
     }
@@ -280,16 +265,16 @@ public class NlpAnalysis {
         System.out.println("Entity type: "+question_entity_type);
 
     }
+// no using constit parsing as doesnt indicate the recipient of the relationship like depencancy parsing does
+//   public static void constituencyParse(CoreDocument doc){
+//       CoreSentence sentence=doc.sentences().get(0);
+//       //Method 1:
+//       Tree constitParse1 = sentence.constituencyParse();
+//       System.out.println("Example: constituency parse");
+//       System.out.println(constitParse1);
+//       System.out.println();
 
-    public static void constituencyParse(CoreDocument doc){
-        CoreSentence sentence=doc.sentences().get(0);
-        //Method 1:
-        Tree constitParse1 = sentence.constituencyParse();
-        System.out.println("Example: constituency parse");
-        System.out.println(constitParse1);
-        System.out.println();
-
-    }
+  //  }
     public static LinkedList<String> dependancyParser(String query)
     {
         LinkedList<String> depParse= new LinkedList<>();
@@ -300,8 +285,30 @@ public class NlpAnalysis {
 
         SemanticGraph depGraph =sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
         //Gets the dependancy Parse
-        System.out.println("Depenecy parse");
         for (TypedDependency typedDependency : depGraph.typedDependencies()) {
+        
+            String relation=typedDependency.reln().getShortName();
+            String governor = typedDependency.gov().originalText();
+            String dependent = typedDependency.dep().originalText();
+            String conditionType="";
+            String conditionFunctionailty="";
+            if(relation.equals("conj")){
+                //big and honest govenor=big dependant=honest
+                System.out.println("Conjunction words:"+relation+":"+governor+":"+dependent);
+
+            }
+            if(relation.equals("cc")){
+                conditionType=dependent;
+                filterCondition=dependent;
+                containsFilter=true;
+                System.out.println("Logical Operator type: "+conditionType);
+            }
+            if(relation.equals("case")){
+                // catches 'between' for range functionality of dates
+                conditionFunctionailty=dependent;
+                System.out.println("Will help with range function: "+conditionFunctionailty);
+
+            }
             String line = typedDependency.toString();
             depParse.add(line);
 

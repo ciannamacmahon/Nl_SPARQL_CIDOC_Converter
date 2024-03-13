@@ -19,16 +19,17 @@ public class Sparql {
             "        PREFIX vt_ont: <https://ont.virtualtreasury.ie/ontology#>\n";
 
             
-    public static String createSPARQLQuery(LinkedList<String> entityType, LinkedList<String> entity,String question,String subj,String pred,LinkedList <String> obj,boolean rangeFilter)
+    public static String createSPARQLQuery(LinkedList<String> entityType, LinkedList<String> entity,String question,String subj,String pred,LinkedList <String> obj,boolean rangeFilter,String filterCondition)
     {
         populateCIDOCDictionary();
-        String select="";
+        String selectTarget="";
         //select phrases
         if(subj.contains("?")){
                 //subject is the intent and should want the name if its person
+                //object is the target
                 String typeQ=subj.substring(1,subj.length());
                 if (typeQ.equals("Person")){
-                    select=selectSection("personName");
+                    selectTarget=selectSection("personName");
                 }
         }
         else if(obj.size()==1 && obj.get(0).contains("?")){
@@ -36,14 +37,24 @@ public class Sparql {
             //object is the intent of the question
             // normaly the pred combined with object question is intent
             //bearPlaceName
-            select=selectSection(pred+objExtracted.substring(1,objExtracted.length()));
+            selectTarget=selectSection(pred+objExtracted.substring(1,objExtracted.length()));
         }
         for(String word:obj){
             System.out.println("objects are ; "+word);
         }
 
         String body=bodyQuery(subj,pred,obj);
-        String filterPart=filterQuery(entity,entityType,rangeFilter);
+        String queryType="";
+        // shoudl this go here so can add in list of objects to the constructor if there is loads of objects for the filter ie. between dates
+       // String filterPart="";
+        if(question.contains("How many")){
+            //currently default so will count number of people under the given header 'people'
+            queryType="select(count(distinct ?person)as ?people )";
+        }
+        else{
+            queryType="select distinct"+selectTarget;
+        }
+        String filterPart=filterQuery(entity,entityType,rangeFilter,obj,filterCondition);
 
             //substitute the name in the person part of the query
         // person is the constant in all queries
@@ -53,13 +64,7 @@ public class Sparql {
         if (entityType.contains("PERSON")){
             //
         }
-        String queryType="";
-        if(question.contains("How many")){
-            queryType="select(count "+select+")";
-        }
-        else{
-            queryType="select distinct"+select;
-        }
+        
         String fullQuery=prefixQuery+queryType+" Where {"+"\n"+person+"\n"+body+filterPart+"} Limit 5";
         System.out.println("---------------------------------");
         System.out.println("SPARQL Query: "+fullQuery);
@@ -73,34 +78,46 @@ public class Sparql {
         String finalSelect="?"+selection;
         return finalSelect;
     }
-    public static String filterQuery(LinkedList<String> entityT,LinkedList<String> entityString,boolean rangeFilter){
+    public static String filterQuery(LinkedList<String> entityString,LinkedList<String> entityT,boolean rangeFilter,LinkedList<String> objectList,String filterCondition){
         String filterStringEnd=").";
-        String filterString="filter(?";
+        String filterStringStart="\nfilter(";
+        String filterString="";
+        String fullFilterString="";
         // add in filter based on cidocTarget and replace it with the entityString
-        if(rangeFilter){
+
+        //13/3
+        // this bit should be for more than one filter of same type like between two dates
+        if(rangeFilter && filterCondition.contains("or")){
+            //needs to condsider the OR condition for '||'
 
         }
         else{
-            if(entityT.size()>1){
-                for(int i=0;i<entityT.size()-1;i++){
-                    if(i!=0){
-                        filterString=filterString+"%%";
+            // works for AND condition
+            for(int i=0;i<objectList.size();i++){
+                String objWord=objectList.get(i);
+                // crashes as if its same entity then not added to entity list
+            //    System.out.println(entityT.get(i));
+                if (objWord.matches(".*\\d+.*")){
+                    System.out.println("check three");
 
-                    }
-                    if(entityT.get(i).contains("DATE")){
-                    }
-                    else if (entityT.get(i).contains("CITY")){
-                        filterString=filterString+cidocTarget+"=='"+entityString.get(i)+"'";
-                    }
+                    filterString=filterStringStart+"?"+cidocTarget+"='"+objWord+"'^^xsd:date";
                 }
-                filterString=filterString+filterStringEnd;
-                System.out.println("Final "+filterString);
+                else {
+                    filterString=filterStringStart+"CONTAINS(str(?"+cidocTarget+") ,'"+objWord+"')";
+                    System.out.println("check four");
+
+                }
+                fullFilterString=fullFilterString+filterString;
+
             }
-        }
+                
+            }
+            fullFilterString=fullFilterString+filterStringEnd;
+            System.out.println("Final "+fullFilterString);
 
         //if entity equals place then replace the cidoc part in the returned bodySPARQLQuery with the entity
         
-        return "";
+        return filterString;
     }
     public static String bodyQuery(String subj,String pred,LinkedList<String> obj){
         // whats the target?
@@ -122,6 +139,9 @@ public class Sparql {
             cidocTarget=pred+objExtract.substring(1,objExtract.length());
         }
         bodySPARQLQuery=findCIDOC(cidocTarget);
+        for(String obTeset:obj){
+            System.out.println("testing objects: "+obTeset);
+        }
         return bodySPARQLQuery;
 
     }
