@@ -5,10 +5,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.LinkedList;
 
 
 public class Sparql {
     public static Map<String, String> cidoc_dict=new Hashtable<>();
+    public static String cidocTarget="";
     public static String prefixQuery="PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
             "        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
@@ -16,27 +18,32 @@ public class Sparql {
             "        PREFIX vt: <https://kb.virtualtreasury.ie/>\n" +
             "        PREFIX vt_ont: <https://ont.virtualtreasury.ie/ontology#>\n";
 
-
-    public static String createSPARQLQuery(String entityType, String entity,String subj,String pred,String obj)
+            
+    public static String createSPARQLQuery(LinkedList<String> entityType, LinkedList<String> entity,String question,String subj,String pred,LinkedList <String> obj,boolean rangeFilter)
     {
         populateCIDOCDictionary();
         String select="";
         //select phrases
         if(subj.contains("?")){
-            //subject is the intent and should want the name if its person
-            String typeQ=subj.substring(1,subj.length());
-            if (typeQ.equals("Person")){
-                select=selectSection("personName");
-            }
+                //subject is the intent and should want the name if its person
+                String typeQ=subj.substring(1,subj.length());
+                if (typeQ.equals("Person")){
+                    select=selectSection("personName");
+                }
         }
-        else if(obj.contains("?")){
+        else if(obj.size()==1 && obj.get(0).contains("?")){
+            String objExtracted=obj.get(0);
             //object is the intent of the question
             // normaly the pred combined with object question is intent
             //bearPlaceName
-            select=selectSection(pred+obj.substring(1,obj.length()));
+            select=selectSection(pred+objExtracted.substring(1,objExtracted.length()));
+        }
+        for(String word:obj){
+            System.out.println("objects are ; "+word);
         }
 
-        String body=bodyQuery(subj,pred,obj,entity,entityType);
+        String body=bodyQuery(subj,pred,obj);
+        String filterPart=filterQuery(entity,entityType,rangeFilter);
 
             //substitute the name in the person part of the query
         // person is the constant in all queries
@@ -46,10 +53,14 @@ public class Sparql {
         if (entityType.contains("PERSON")){
             //
         }
-
-
-        String startSelect="select distinct";
-        String fullQuery=prefixQuery+startSelect+"\n"+select+" Where {"+"\n"+person+"\n"+body+"} Limit 5";
+        String queryType="";
+        if(question.contains("How many")){
+            queryType="select(count "+select+")";
+        }
+        else{
+            queryType="select distinct"+select;
+        }
+        String fullQuery=prefixQuery+queryType+" Where {"+"\n"+person+"\n"+body+filterPart+"} Limit 5";
         System.out.println("---------------------------------");
         System.out.println("SPARQL Query: "+fullQuery);
         // System.out.println(fullQuery);
@@ -62,56 +73,76 @@ public class Sparql {
         String finalSelect="?"+selection;
         return finalSelect;
     }
+    public static String filterQuery(LinkedList<String> entityT,LinkedList<String> entityString,boolean rangeFilter){
+        String filterStringEnd=").";
+        String filterString="filter(?";
+        // add in filter based on cidocTarget and replace it with the entityString
+        if(rangeFilter){
 
-    public static String bodyQuery(String subj,String pred,String obj,String entity,String entityType){
+        }
+        else{
+            if(entityT.size()>1){
+                for(int i=0;i<entityT.size()-1;i++){
+                    if(i!=0){
+                        filterString=filterString+"%%";
+
+                    }
+                    if(entityT.get(i).contains("DATE")){
+                    }
+                    else if (entityT.get(i).contains("CITY")){
+                        filterString=filterString+cidocTarget+"=='"+entityString.get(i)+"'";
+                    }
+                }
+                filterString=filterString+filterStringEnd;
+                System.out.println("Final "+filterString);
+            }
+        }
+
+        //if entity equals place then replace the cidoc part in the returned bodySPARQLQuery with the entity
+        
+        return "";
+    }
+    public static String bodyQuery(String subj,String pred,LinkedList<String> obj){
         // whats the target?
-        String cidoc="";
         String bodySPARQLQuery="";
         if(subj.contains("?")){
             // subject is the target
-            if (obj.matches(".*\\d+.*")){
-                cidoc=pred+"Date";
+            String extractedObj=obj.get(0);
+            System.out.println("first object is "+extractedObj);
+            if (obj.get(0).matches(".*\\d+.*")){
+                cidocTarget=pred+"Date";
             }
             else{
-                cidoc=pred+"PlaceName";
+                cidocTarget=pred+"PlaceName";
             }
-
         }
-        else if (obj.contains("?")){
+        else if (obj.get(0).contains("?")){
+            String objExtract=obj.get(0);
             //object is the target
-            cidoc=pred+obj.substring(1,obj.length());
+            cidocTarget=pred+objExtract.substring(1,objExtract.length());
         }
-        bodySPARQLQuery=findCIDOC(cidoc);
-
-        //if entity equals place then replace the cidoc part in the returned bodySPARQLQuery with the entity
-        if(subj.contains("?")){
-            if(entityType.contains("DATE")){
-                String inputDate=entity;
-                if(isFullFormat(inputDate)){
-                    String filterString="\nfilter(?"+cidoc+"='"+inputDate+"'^^xsd:date).";
-                    String finalTest=bodySPARQLQuery+filterString;
-                    bodySPARQLQuery=finalTest;
-                    System.out.println("????????????????????? \n"+bodySPARQLQuery);
-                }
-                else{
-                    String filterString="\nfilter(?"+cidoc+">='"+inputDate+"-01-01'^^xsd:date).\n" +
-                            "filter(?"+cidoc+"<='"+inputDate+"-12-31'^^xsd:date).";
-                    String finalTest=bodySPARQLQuery+filterString;
-                    bodySPARQLQuery=finalTest;
-                    System.out.println("????????????????????? \n"+bodySPARQLQuery);
-                }
-
-
-            }
-            else if (entityType.contains("CITY")){
-                bodySPARQLQuery=placeQuery(bodySPARQLQuery,entity);
-            }
-
-        }
+        bodySPARQLQuery=findCIDOC(cidocTarget);
         return bodySPARQLQuery;
 
     }
-    public static String dateQuery(){
+    
+    public static String dateQuery(String bodyQuery,String entity,String cidoc){
+        String inputDate=entity;
+                if(isFullFormat(inputDate)){
+                    String filterString="\nfilter(?"+cidoc+"='"+inputDate+"'^^xsd:date).";
+                    String finalTest=bodyQuery+filterString;
+                    bodyQuery=finalTest;
+                    System.out.println("????????????????????? \n"+bodyQuery);
+                }
+                //deafult to start of the year
+                else{
+                    String filterString="\nfilter(?"+cidoc+">='"+inputDate+"-01-01'^^xsd:date).\n" +
+                            "filter(?"+cidoc+"<='"+inputDate+"-12-31'^^xsd:date).";
+                    String finalTest=bodyQuery+filterString;
+                    bodyQuery=finalTest;
+                    System.out.println("????????????????????? \n"+bodyQuery);
+                }
+
         return "empty";
     }
     public static String placeQuery(String bodyQuery,String enity){
@@ -131,14 +162,14 @@ public class Sparql {
             return false;
         }
     }
-    public static String personQuery(String entityType, String entity){
+    public static String personQuery(LinkedList<String> entityType, LinkedList<String> entity){
         String nameAppellation="normalized-appellation-surname-forename";
         String findPerson="?person crm:P1_is_identified_by ?appellation.\n"+
                 "       ?appellation rdfs:label ?personName. ";
         if(entityType.equals("PERSON")){
-            String []personN=entity.split(" ");
-            String surname_forename=personN[1]+", "+personN[0];
-            findPerson=findPerson.replace("?personName","'"+surname_forename+"'.");
+          //  String []personN=entity.split(" ");
+          //  String surname_forename=personN[1]+", "+personN[0];
+          //  findPerson=findPerson.replace("?personName","'"+surname_forename+"'.");
         }
         else{
             findPerson=findPerson+"FILTER(CONTAINS(str(?appellation),'"+nameAppellation+"')).";
@@ -176,4 +207,6 @@ public class Sparql {
                 "?diePlaceLink rdfs:label ?diePlaceName.");
 
     }
+
+    
 }
