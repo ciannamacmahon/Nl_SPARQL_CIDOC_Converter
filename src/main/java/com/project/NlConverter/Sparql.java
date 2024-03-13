@@ -19,7 +19,8 @@ public class Sparql {
             "        PREFIX vt_ont: <https://ont.virtualtreasury.ie/ontology#>\n";
 
             
-    public static String createSPARQLQuery(LinkedList<String> entityType, LinkedList<String> entity,String question,String subj,String pred,LinkedList <String> obj,boolean rangeFilter,String filterCondition)
+    public static String createSPARQLQuery(LinkedList<String> entityType, LinkedList<String> entity,String question,String subj,String pred,
+    LinkedList <String> obj,boolean rangeFilter,String filterCondition,LinkedList logicalExpressions,boolean dateRange)
     {
         populateCIDOCDictionary();
         String selectTarget="";
@@ -54,7 +55,7 @@ public class Sparql {
         else{
             queryType="select distinct"+selectTarget;
         }
-        String filterPart=filterQuery(entity,entityType,rangeFilter,obj,filterCondition);
+        String filterPart=filterQuery(entity,entityType,rangeFilter,obj,filterCondition,dateRange);
 
             //substitute the name in the person part of the query
         // person is the constant in all queries
@@ -78,7 +79,7 @@ public class Sparql {
         String finalSelect="?"+selection;
         return finalSelect;
     }
-    public static String filterQuery(LinkedList<String> entityString,LinkedList<String> entityT,boolean rangeFilter,LinkedList<String> objectList,String filterCondition){
+    public static String filterQuery(LinkedList<String> entityString,LinkedList<String> entityT,boolean rangeFilter,LinkedList<String> objectList,String filterCondition,boolean dateRange){
         String filterStringEnd=").";
         String filterStringStart="\nfilter(";
         String filterString="";
@@ -87,6 +88,7 @@ public class Sparql {
 
         //13/3
         // this bit should be for more than one filter of same type like between two dates
+        
         if(rangeFilter && filterCondition.contains("or")){
             //needs to condsider the OR condition for '||'
 
@@ -98,6 +100,9 @@ public class Sparql {
                 // crashes as if its same entity then not added to entity list
             //    System.out.println(entityT.get(i));
                 if (objWord.matches(".*\\d+.*")){
+                    if(dateRange){
+
+                    }
                     System.out.println("check three");
 
                     filterString=filterStringStart+"?"+cidocTarget+"='"+objWord+"'^^xsd:date";

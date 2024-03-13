@@ -30,7 +30,9 @@ public class NlpAnalysis {
     static StanfordCoreNLP pipeline;
     public static String[] QuestionArray=new String[6];
     public static boolean containsFilter=false;
+    public static boolean dateRange=false;
     public static String filterCondition="";
+    public static LinkedList<LinkedList> logicalExpressions=new LinkedList<>();
 
     public static void QuestionList(){
         QuestionArray[0]="When";
@@ -58,7 +60,7 @@ public class NlpAnalysis {
         predictTarget();
         NlpAnalysis.pringQual(depQualities);
         object.remove("and");
-        String sparlCIDOCQuery=Sparql.createSPARQLQuery(question_entity_type,question_entity,questionWord,subject,predicate,object,containsFilter,filterCondition);
+        String sparlCIDOCQuery=Sparql.createSPARQLQuery(question_entity_type,question_entity,questionWord,subject,predicate,object,containsFilter,filterCondition,logicalExpressions,dateRange);
       //  //if endpoint could compile
        // EndpointExecution.searchGraph(sparlCIDOCQuery);
     }
@@ -293,8 +295,13 @@ public class NlpAnalysis {
             String conditionType="";
             String conditionFunctionailty="";
             if(relation.equals("conj")){
+                LinkedList<String> conjunctionPairs=new LinkedList<>();
                 //big and honest govenor=big dependant=honest
                 System.out.println("Conjunction words:"+relation+":"+governor+":"+dependent);
+                conjunctionPairs.add(relation);
+                conjunctionPairs.add(governor);
+                conjunctionPairs.add(dependent);
+                logicalExpressions.add(conjunctionPairs);
 
             }
             if(relation.equals("cc")){
@@ -304,8 +311,14 @@ public class NlpAnalysis {
                 System.out.println("Logical Operator type: "+conditionType);
             }
             if(relation.equals("case")){
+                LinkedList<String> rangeForDates=new LinkedList<>();
+
                 // catches 'between' for range functionality of dates
                 conditionFunctionailty=dependent;
+                rangeForDates.add(relation);
+                rangeForDates.add(conditionFunctionailty);
+                logicalExpressions.add(rangeForDates);
+                dateRange=true;
                 System.out.println("Will help with range function: "+conditionFunctionailty);
 
             }
