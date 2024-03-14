@@ -6,7 +6,7 @@ import axios from 'axios';
 function MainPage() {
     const [searchInput,setSearchInput]=useState("");
     const [buttonColour, setButtonColour]=useState("white");
-    const[sparqlQuery,setSparqlQuery]=useState("");
+    const[sparqlQuery,setSparqlQuery]=useState("Enter Your Query in Search Bar Above");
     const[showSparqlQuery,setShowSparqlQuery]=useState(false);
     const config={headers:{'Content-Type':'application/json'}};
 
@@ -16,7 +16,8 @@ function MainPage() {
 
     const handleSubmit= async(event)=>{
       event.preventDefault();
-      setButtonColour("black");
+      setButtonColour("yellow");
+      setSparqlQuery("Loading......");
       try {
         console.log("Sending request with searchInput:", searchInput); // Log the searchInput value
         const response = await axios.post("http://localhost:8080/searchEngine",  searchInput,config );
@@ -31,7 +32,6 @@ function MainPage() {
     }
 
     const fetchQuery=async () =>{
-      setSparqlQuery("Loading.....");
       const response=await axios.get("http://localhost:8080/sparqlQuery",config);
       setSparqlQuery(response.data.sparqlQuery);
       setShowSparqlQuery(true);
@@ -40,10 +40,11 @@ function MainPage() {
 
     return(
       <div className='MainPage'>
-          <div className="SearchBar">
+          <div className="Search">
             <form onSubmit={handleSubmit}
                         className="form">
               <input 
+              
                 type="text" 
                 placeholder="Enter your search query on the VRTI KG"
                 onChange={handleChange} 
@@ -55,7 +56,8 @@ function MainPage() {
             </form>
           </div>
           <div className='resultBox'>
-            <p>The Natural Language Result will be shown here</p>
+            <p>{sparqlQuery}</p>
+            
 
           </div>
           <div className='rawSparqlResult'>

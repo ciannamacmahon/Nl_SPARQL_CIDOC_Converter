@@ -6,9 +6,7 @@ function Home() {
     return (
       <div className="homepage">
           <h1>
-            Hey Knowledge <br /> Graph,
-            <br />
-            tell me something!
+            Welcome
           </h1>
           <Link to="/searchCase">
             <button className="button"> Click To Get Started</button>
