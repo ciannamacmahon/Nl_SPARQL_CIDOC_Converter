@@ -30,6 +30,9 @@ public class NlpAnalysis {
     public static boolean containsFilter=false;
     public static String filterCondition="";
     private static String fullSPARQLQuery="";
+    private static String graphAnswer="";
+    private static String naturalLanguageResult="";
+    private static String chatGPTPrompt="";
 
     public static void QuestionList(){
         QuestionArray[0]="When";
@@ -41,9 +44,9 @@ public class NlpAnalysis {
 
     }
 
-   public static void main(String args[]) throws FileNotFoundException{
-       entryPoint("How many people were born in 1600?");
-    }
+   //public static void main(String args[]) throws FileNotFoundException{
+   //    entryPoint("How many people were born in 1600?");
+   // }
     public static void entryPoint(String userInputQuery) throws FileNotFoundException {
        // QuestionList();
         Properties props = new Properties();
@@ -57,15 +60,25 @@ public class NlpAnalysis {
         NlpAnalysis.pringQual(depQualities);
         fullSPARQLQuery=Sparql.createSPARQLQuery(question_entity_type,question_entity,questionWord,subject,predicate,object,containsFilter,filterCondition);
       //  //if endpoint could compile
-        String graphAnswer=EndpointExecution.searchGraph(fullSPARQLQuery);
+        graphAnswer=EndpointExecution.searchGraph(fullSPARQLQuery);
         // Cannot include '\n' symbol in the prompt at all
-        String chatGPTPrompt="Given this query: "+userInputQuery+"And this result: "
-            +graphAnswer+"Turn the result into a natural language sentence";
-        System.out.println("Sending to chatGPT: "+chatGPTPrompt);
-        String naturalLanguageResult=NLG.connectToChatGPT(chatGPTPrompt);
-        System.out.println("final answer: "+naturalLanguageResult);
+        chatGPTPrompt="Given this query: "+userInputQuery+"And this result: "
+            +graphAnswer+" Turn the result into a natural language sentence";
+        
     }
+    public static void connectChatGPT(){
+        System.out.println("Sending to chatGPT: "+chatGPTPrompt);
+        naturalLanguageResult=NLG.connectToChatGPT(chatGPTPrompt);
+        System.out.println("final answer: "+naturalLanguageResult);
 
+    }
+    public static String getGraphResult(){
+        return graphAnswer;
+    }
+    public static String getNaturalLanguageResult(){
+        connectChatGPT();
+        return naturalLanguageResult;
+    }
     public static String getSPARQLQuery(){
         return fullSPARQLQuery;
     }
@@ -76,7 +89,7 @@ public class NlpAnalysis {
         Scanner scanner= new Scanner(file);
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
-          //  System.out.println(line);
+            System.out.println(line);
             String[] parts = line.split(", ");
 
             // Add the array to the list

@@ -9,7 +9,7 @@ import java.net.URL;
 public class NLG {
 
     public static String connectToChatGPT(String startPrompt) {
-        String API_Key="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";
+        String API_Key="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";
 
         String url="https://api.openai.com/v1/chat/completions";
         String model="gpt-3.5-turbo";

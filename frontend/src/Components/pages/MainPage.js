@@ -32,10 +32,34 @@ function MainPage() {
     }
 
     const fetchQuery=async () =>{
-      const response=await axios.get("http://localhost:8080/sparqlQuery",config);
-      setSparqlQuery(response.data.sparqlQuery);
-      setShowSparqlQuery(true);
-      
+      const result= await axios.get("http://localhost:8080/sparqlQuery")
+      console.log(result.data);
+       // .then(res =>{
+       //   const result=res.data;
+       //   setSparqlQuery(result);
+       //   setShowSparqlQuery(true);
+
+      //})      
+    }
+    const fetchResult=async () =>{
+      const result1= await axios.get("http://localhost:8080/sparqlResult")
+      console.log(result1.data);
+       // .then(res =>{
+       //   const result=res.data;
+       //   setSparqlQuery(result);
+       //   setShowSparqlQuery(true);
+
+      //})      
+    }
+    const fetchNlResult=async () =>{
+      const result2= await axios.get("http://localhost:8080/naturalLanguageResult")
+      console.log(result2.data);
+       // .then(res =>{
+       //   const result=res.data;
+       //   setSparqlQuery(result);
+       //   setShowSparqlQuery(true);
+
+      //})      
     }
 
     return(
@@ -62,7 +86,7 @@ function MainPage() {
           </div>
           <div className='rawSparqlResult'>
             <button>View Raw SPARQL Result</button>
-            <button onClick={handleViewSparqlQuery}>View SPARQL Query</button>
+            <button onClick={handleViewSparqlQuery && fetchQuery && fetchResult && fetchNlResult}>View SPARQL Query</button>
             {showSparqlQuery && (
               <div>
                 <p> SPARQL Query: {sparqlQuery}</p>

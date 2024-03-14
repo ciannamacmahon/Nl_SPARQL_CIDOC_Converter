@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @SpringBootApplication
 public class NlConverterApplication {
+	NlpAnalysis nlp=new NlpAnalysis();
 
 	public static void main(String[] args) {
 		SpringApplication.run(NlConverterApplication.class, args);
@@ -22,16 +23,12 @@ public class NlConverterApplication {
 
 	 */
 
-	@GetMapping("/searchEngine")
-	 public static String spingTester(){
-        return "hello world";
-    }
 	@PostMapping("/searchEngine")
 	public String processQuery(@RequestBody String userInputQuery) throws UnsupportedEncodingException{
 		System.out.println("received from frontend");
 		try{
 			System.out.println(userInputQuery);
-			NlpAnalysis.entryPoint(userInputQuery);
+			nlp.entryPoint(userInputQuery);
 			return "Query ok";
 		}catch(FileNotFoundException e){
 			e.printStackTrace();
@@ -39,9 +36,16 @@ public class NlConverterApplication {
 		}
 	}
 	@GetMapping("/sparqlQuery")
-	public String retreiveSPARQLQuery(String queryString) throws UnsupportedEncodingException{
-		return queryString;
-		
+	public String retreiveSPARQLQuery() {
+		return nlp.getSPARQLQuery();
+	}
+	@GetMapping("/sparqlResult")
+	public String retreiveSPARQLResult() {
+		return nlp.getGraphResult();
+	}
+	@GetMapping("/naturalLanguageResult")
+	public String retreiveNLResult() {
+		return "error check";
 	}
 
 }
