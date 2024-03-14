@@ -29,6 +29,7 @@ public class NlpAnalysis {
     public static String[] QuestionArray=new String[6];
     public static boolean containsFilter=false;
     public static String filterCondition="";
+    private static String fullSPARQLQuery="";
 
     public static void QuestionList(){
         QuestionArray[0]="When";
@@ -40,9 +41,8 @@ public class NlpAnalysis {
 
     }
 
-    public static void main(String args[]) throws FileNotFoundException{
-
-        entryPoint("How many people were born in 1600?");
+   public static void main(String args[]) throws FileNotFoundException{
+       entryPoint("How many people were born in 1600?");
     }
     public static void entryPoint(String userInputQuery) throws FileNotFoundException {
        // QuestionList();
@@ -55,9 +55,19 @@ public class NlpAnalysis {
         populateTargetQuestions();
         predictTarget();
         NlpAnalysis.pringQual(depQualities);
-        String sparlCIDOCQuery=Sparql.createSPARQLQuery(question_entity_type,question_entity,questionWord,subject,predicate,object,containsFilter,filterCondition);
+        fullSPARQLQuery=Sparql.createSPARQLQuery(question_entity_type,question_entity,questionWord,subject,predicate,object,containsFilter,filterCondition);
       //  //if endpoint could compile
-        EndpointExecution.searchGraph(sparlCIDOCQuery);
+        String graphAnswer=EndpointExecution.searchGraph(fullSPARQLQuery);
+        // Cannot include '\n' symbol in the prompt at all
+        String chatGPTPrompt="Given this query: "+userInputQuery+"And this result: "
+            +graphAnswer+"Turn the result into a natural language sentence";
+        System.out.println("Sending to chatGPT: "+chatGPTPrompt);
+        String naturalLanguageResult=NLG.connectToChatGPT(chatGPTPrompt);
+        System.out.println("final answer: "+naturalLanguageResult);
+    }
+
+    public static String getSPARQLQuery(){
+        return fullSPARQLQuery;
     }
 
 

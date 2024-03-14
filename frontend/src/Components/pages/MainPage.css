@@ -7,3 +7,21 @@
     line-height: 30px;
     margin: 30px auto;
   }
+
+  .resultBox {
+    /* grid-template-rows: 10fr 1fr;
+    flex-direction: row; */
+    background-color: rgb(253, 251, 255);
+    width: 60%;
+    height: fit-content;
+    border: 3px solid rgb(17, 10, 10);
+    padding: 60px;
+    margin-top: 6em;
+    margin-left: 2em;
+    font-size: 15px;
+    font-family: inherit;
+  }
+  
+  .resultBox p {
+    font-size: 25px;
+  }

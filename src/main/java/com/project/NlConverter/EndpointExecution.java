@@ -30,10 +30,11 @@ public class EndpointExecution {
      //   searchGraph(sparqlQuery);
     }
 
-    public static void searchGraph(String sparqlString) {
+    public static String searchGraph(String sparqlString) {
         String sparqlEndpoint = "https://blazegraph.virtualtreasury.ie/blazegraph/namespace/b2022/sparql";
         QueryExecution q = QueryExecution.service(sparqlEndpoint, sparqlString);
         ResultSet result = q.execSelect();
+        String finalResult="";
         System.out.println("The results are as follows:\n");
         while (result.hasNext()) {
             QuerySolution solution = result.next();
@@ -42,8 +43,10 @@ public class EndpointExecution {
                 String selectVariable = variables.next();
                 String resultVariable = solution.get(selectVariable).toString();
                 System.out.println(selectVariable + ": " + resultVariable);
+                finalResult=finalResult+resultVariable;
             }
         }
+        return finalResult;
 
     }
 }

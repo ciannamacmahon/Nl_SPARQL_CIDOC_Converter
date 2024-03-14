@@ -9,7 +9,7 @@ import java.net.URL;
 public class NLG {
 
     public static String connectToChatGPT(String startPrompt) {
-        String API_Key="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";
+        String API_Key="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";
 
         String url="https://api.openai.com/v1/chat/completions";
         String model="gpt-3.5-turbo";
@@ -53,15 +53,16 @@ public class NLG {
           //  System.out.println("Full JSON Response: " + response);
             JSONObject responseObject=new JSONObject(response);
             JSONArray choicesArray=responseObject.getJSONArray("choices");
+            String result="";
             for(int i=0;i<choicesArray.length();i++){
                 JSONObject choiceObject=choicesArray.getJSONObject(i);
                 JSONObject messageObject=choiceObject.getJSONObject("message");
 
-                String content=messageObject.getString("content");
-                System.out.println("Target response from chatGPT: "+content);
+                result=messageObject.getString("content");
+                System.out.println("Target response from chatGPT: "+result);
 
             }
-            return "";
+            return result;
 
 
         }
@@ -83,14 +84,14 @@ public class NLG {
          */
 
 
-        public static void main(String[] args){
-            String startPrompt="Given this query: When was Abbadie, Jacques born?. " +
-                    "And this result:bearDate: 1654-01-01. " +
-                    "Turn the result into a natural language sententce";
-       // String answerFromChatGPT=connectToChatGPT(startPrompt);
-        //javaGPT(startPrompt);
-        System.out.println(connectToChatGPT(startPrompt));
-    }
+   //     public static void main(String[] args){
+   //         String startPrompt="Given this query: When was Abbadie, Jacques born?. " +
+   //                 "And this result:bearDate: 1654-01-01. " +
+   //                 "Turn the result into a natural language sententce";
+   //    // String answerFromChatGPT=connectToChatGPT(startPrompt);
+   //     //javaGPT(startPrompt);
+   //     System.out.println(connectToChatGPT(startPrompt));
+   // }
     /*
     var chatRequest = ChatRequest.builder()
     .model("gpt-3.5-turbo-1106")

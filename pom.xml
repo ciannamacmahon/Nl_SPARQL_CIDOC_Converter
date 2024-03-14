@@ -160,14 +160,6 @@
 			</exclusions>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/ai.djl.huggingface/tokenizers -->
-		<dependency>
-			<groupId>ai.djl.huggingface</groupId>
-			<artifactId>tokenizers</artifactId>
-			<version>0.26.0</version>
-		</dependency>
-
-
 	</dependencies>
 
 	<build>

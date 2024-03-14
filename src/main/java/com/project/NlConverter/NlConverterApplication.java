@@ -38,6 +38,11 @@ public class NlConverterApplication {
 			return "Error occured: "+ e.getMessage();
 		}
 	}
+	@GetMapping("/sparqlQuery")
+	public String retreiveSPARQLQuery(String queryString) throws UnsupportedEncodingException{
+		return queryString;
+		
+	}
 
 }
 
