@@ -28,6 +28,7 @@ public class NlpAnalysis {
     static StanfordCoreNLP pipeline;
     public static String[] QuestionArray=new String[6];
     public static boolean containsFilter=false;
+    public static String filterCondition="";
 
     public static void QuestionList(){
         QuestionArray[0]="When";
@@ -41,7 +42,7 @@ public class NlpAnalysis {
 
     public static void main(String args[]) throws FileNotFoundException{
 
-        entryPoint("How many people were born between 1600-01-01 and 1610-01-01");
+        entryPoint("How many people were born in 1600?");
     }
     public static void entryPoint(String userInputQuery) throws FileNotFoundException {
        // QuestionList();
@@ -54,9 +55,9 @@ public class NlpAnalysis {
         populateTargetQuestions();
         predictTarget();
         NlpAnalysis.pringQual(depQualities);
-        String sparlCIDOCQuery=Sparql.createSPARQLQuery(question_entity_type,question_entity,questionWord,subject,predicate,object,containsFilter);
+        String sparlCIDOCQuery=Sparql.createSPARQLQuery(question_entity_type,question_entity,questionWord,subject,predicate,object,containsFilter,filterCondition);
       //  //if endpoint could compile
-     //   EndpointExecution.searchGraph(sparlCIDOCQuery);
+        EndpointExecution.searchGraph(sparlCIDOCQuery);
     }
 
 
@@ -168,9 +169,10 @@ public class NlpAnalysis {
 
     //Test method; each item in the list is the characteristic of that word
     public static void pringQual(LinkedList <String>qualOfQuery){
+        System.out.println("Dependancy Paerse");
         for (String line:qualOfQuery){
 
-            System.out.println("sgfsdf \n"+line+"\ndfgdg");
+            System.out.println("\n"+line);
 
         }
         SPOExtraction(qualOfQuery);
@@ -189,24 +191,7 @@ public class NlpAnalysis {
       //  String lemmaVersionQuery=lemmaQuery(query);
 
     }
-    public static String removeQ(String query){
-        String[] ques=query.split(" ");
-        for (String Question:QuestionArray){
-            System.out.println(Question + "bgbg "+ ques[0]);
-            if (Question.equals(ques[0])){
-                ques= Arrays.copyOfRange(ques,1,ques.length);
-                StringBuilder sentenceBuilder = new StringBuilder();
-                for (String word : ques) {
-                    sentenceBuilder.append(word).append(" ");
-                }
-                // Remove trailing space and print the sentence
-                String sentence = sentenceBuilder.toString().trim();
-                System.out.println(sentence);
-                return sentence;
-            }
-        }
-        return"";
-    }
+    
     public static String lemmaQuery(String query){
         CoreDocument doc=new CoreDocument(query);
         pipeline.annotate(doc);
@@ -235,12 +220,6 @@ public class NlpAnalysis {
                 else{
                     questionWord=firstToken.word();
                 }
-            }
-            else if (firstToken.word().contains("between")||firstToken.word().contains("within")){
-                containsFilter=true;
-            }
-            else if (firstToken.tag().contains("comp")){
-                //make this and next word into one
             }
         }
         System.out.println("question: "+questionWord);
@@ -280,16 +259,16 @@ public class NlpAnalysis {
         System.out.println("Entity type: "+question_entity_type);
 
     }
-
-    public static void constituencyParse(CoreDocument doc){
-        CoreSentence sentence=doc.sentences().get(0);
-        //Method 1:
-        Tree constitParse1 = sentence.constituencyParse();
-        System.out.println("Example: constituency parse");
-        System.out.println(constitParse1);
-        System.out.println();
-
-    }
+// wont be using
+ //   public static void constituencyParse(CoreDocument doc){
+ //       CoreSentence sentence=doc.sentences().get(0);
+ //       //Method 1:
+ //       Tree constitParse1 = sentence.constituencyParse();
+ //       System.out.println("Example: constituency parse");
+ //       System.out.println(constitParse1);
+ //       System.out.println();
+//
+ //   }
     public static LinkedList<String> dependancyParser(String query)
     {
         LinkedList<String> depParse= new LinkedList<>();
