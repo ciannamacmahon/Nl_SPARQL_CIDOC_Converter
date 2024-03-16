@@ -9,13 +9,14 @@ import java.net.URL;
 public class NLG {
 
     public static String connectToChatGPT(String startPrompt) {
-        String API_Key="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";
+        String API_Key="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";
 
         String url="https://api.openai.com/v1/chat/completions";
         String model="gpt-3.5-turbo";
 
         try{
             URL obj=new URL(url);
+            JSONObject respQ=null;
             HttpURLConnection connection=(HttpURLConnection)obj.openConnection();
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Authorization","Bearer "+API_Key);
@@ -53,16 +54,16 @@ public class NLG {
           //  System.out.println("Full JSON Response: " + response);
             JSONObject responseObject=new JSONObject(response);
             JSONArray choicesArray=responseObject.getJSONArray("choices");
-            String result="";
+            String content="";
             for(int i=0;i<choicesArray.length();i++){
                 JSONObject choiceObject=choicesArray.getJSONObject(i);
                 JSONObject messageObject=choiceObject.getJSONObject("message");
 
-                result=messageObject.getString("content");
-                System.out.println("Target response from chatGPT: "+result);
+                content=messageObject.getString("content");
+                System.out.println("Target response from chatGPT: "+content);
 
             }
-            return result;
+            return content;
 
 
         }
@@ -84,13 +85,13 @@ public class NLG {
          */
 
 
-   //     public static void main(String[] args){
-   //         String startPrompt="Given this query: When was Abbadie, Jacques born?. " +
-   //                 "And this result:bearDate: 1654-01-01. " +
-   //                 "Turn the result into a natural language sententce";
-   //    // String answerFromChatGPT=connectToChatGPT(startPrompt);
-   //     //javaGPT(startPrompt);
-   //     System.out.println(connectToChatGPT(startPrompt));
+      //  public static void main(String[] args){
+      //      String startPrompt="Given this query: When was Abbadie, Jacques born?. " +
+      //              "And this result:bearDate: 1654-01-01. " +
+      //              "Turn the result into a natural language sententce";
+      // // String answerFromChatGPT=connectToChatGPT(startPrompt);
+      //  //javaGPT(startPrompt);
+      //  System.out.println(connectToChatGPT(startPrompt));
    // }
     /*
     var chatRequest = ChatRequest.builder()
@@ -105,9 +106,5 @@ var futureChat = openai.chatCompletions().create(chatRequest);
 var chatResponse = futureChat.join();
 System.out.println(chatResponse.firstContent());
      */
-
-
-
-
 
 }

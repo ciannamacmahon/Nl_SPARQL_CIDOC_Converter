@@ -66,19 +66,17 @@ public class NlpAnalysis {
             +graphAnswer+" Turn the result into a natural language sentence";
         
     }
-    public static void connectChatGPT(){
+    public static String getChatGPTPrompt(){
         System.out.println("Sending to chatGPT: "+chatGPTPrompt);
-        naturalLanguageResult=NLG.connectToChatGPT(chatGPTPrompt);
-        System.out.println("final answer: "+naturalLanguageResult);
+      //  naturalLanguageResult=NLG.connectToChatGPT(chatGPTPrompt);
+      //  System.out.println("final answer: "+naturalLanguageResult);
+        return chatGPTPrompt;
 
     }
     public static String getGraphResult(){
         return graphAnswer;
     }
-    public static String getNaturalLanguageResult(){
-        connectChatGPT();
-        return naturalLanguageResult;
-    }
+    
     public static String getSPARQLQuery(){
         return fullSPARQLQuery;
     }
