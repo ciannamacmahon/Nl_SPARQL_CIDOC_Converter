@@ -3,9 +3,12 @@ package com.project.NlConverter;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.ai.chat.ChatClient;
 import org.springframework.ai.chat.ChatResponse;
+import org.springframework.ai.chat.Generation;
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
@@ -78,5 +81,18 @@ public class NlConverterApplication {
 	.withTemperature((float) 0.4)
 	.build()
 	));
+	AssistantMessage assistantMessage=response.getResult().getOutput();
+	if(assistantMessage!=null){
+		return assistantMessage.getContent();
+	}else{
+		return "No response Generated";
+	}
+
+	// laptop stopped working but full connection is made
+	/*
+	 * 
+	 */
+	}
+}
 
 
