@@ -131,7 +131,7 @@ function MainPage() {
               <button onClick={handleViewSparqlQuery}>View SPARQL Query</button>
               {showSparqlQuery && (
                 <div className="SparqlQuery">
-                  <p> SPARQL Query: {sparqlQuery}</p>
+                  <p> SPARQL Query: <pre>{sparqlQuery}</pre></p>
                   </div>
               )}
               </div>
