@@ -1,6 +1,7 @@
 import "./MainPage.css";
 import React, { useState } from 'react';
 import axios from 'axios';
+import GPTimage from "./GPT.png";
 
 
 function MainPage() {
@@ -8,10 +9,15 @@ function MainPage() {
     const [buttonColour, setButtonColour]=useState("white");
     const[sparqlQuery,setSparqlQuery]=useState("");
     const[sparqlResult,setSparlResult]=useState("");
-    const[NlResult,setNlResult]=useState("Enter Your Query in Search Bar Above");
+    const[NlResult,setNlResult]=useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const[showSparqlQuery,setShowSparqlQuery]=useState(false);
     const[showSparqlResult,setShowSparqlResult]=useState(false);
     const[showNlResult,setShowNlResult]=useState(false);
+    const[showNGPT,setShowNGPT]=useState(false);
+    const[gptInfo,setgptInfo]=useState("This response was generated with the assistance of chatGPT");
+
+
 
 
     const config={headers:{'Content-Type':'application/json'}};
@@ -19,17 +25,18 @@ function MainPage() {
     const handleChange=(event)=>{
       setSearchInput(event.target.value);
     }
-
+ 
     const handleSubmit= async(event)=>{
       event.preventDefault();
       setButtonColour("yellow");
-      setNlResult("Loading......");
+      setIsLoading("Loading......");
       try {
         console.log("Sending request with searchInput:", searchInput); // Log the searchInput value
         const response = await axios.post("http://localhost:8080/searchEngine",  searchInput,config );
         console.log("Response from backend:", response.data); // Log the response from the backend
         setShowNlResult(!showNlResult);
         await fetchNlResult();
+        setIsLoading(false);
 
       } catch (error) {
         console.error("Error processing:", error);
@@ -49,8 +56,11 @@ function MainPage() {
         fetchResult();
       }
     }
+    const handleViewGPT=()=>{
+      setShowNGPT(!showNGPT);
+    }
     const handleViewNlResult=()=>{
-      if(!showNlResult){
+      if(showNlResult){
         fetchNlResult();
       }
     }
@@ -79,7 +89,7 @@ function MainPage() {
 
     return(
       <div className='MainPage'>
-          <div className="Search">
+          <div className="SearchBar">
             <form onSubmit={handleSubmit}
                         className="form">
               <input 
@@ -96,31 +106,35 @@ function MainPage() {
             </form>
           </div>
           <div className='resultBox'>
-          {showNlResult &&(
+          {isLoading ?(
+            <p>Loading....</p>
+          ): showNlResult ?(
             <div>
-            <p>Processed Result: {NlResult}</p>
-            
-
-          </div>
+              <p>Natural Language Result: {NlResult}</p>
+              <p className="chatGptSubtext" >This natural language result was generated with the help of ChatGPT</p>
+              <img src={GPTimage} className="gptImage"/>
+            </div>
+          ):(
+            <p>Enter your Query in the Search bar above</p>
           )}
           </div>
           <div className="resultContainer">
-            <div className='SparqlResult'>
+            <div>
               <button onClick={handleViewSparqlResult}>View Raw SPARQL Result</button>
               {showSparqlResult && (
-                <div>
+                <div className="resultContainer">
                   <p> SPARQL Result: {sparqlResult}</p>
                   </div>
               )}
             </div>
-            <div>
+              <div>
               <button onClick={handleViewSparqlQuery}>View SPARQL Query</button>
               {showSparqlQuery && (
-                <div className='SparqlResult'>
+                <div className="SparqlQuery">
                   <p> SPARQL Query: {sparqlQuery}</p>
                   </div>
               )}
-            </div>
+              </div>
           </div>
           
       </div>

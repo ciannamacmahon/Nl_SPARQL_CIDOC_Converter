@@ -82,7 +82,7 @@ public class Sparql {
     }
     public static String filterQuery(LinkedList<String> entityString,LinkedList<String> entityT,boolean rangeFilter,LinkedList<String> objectList,String filterCondition){
         String filterStringEnd=").";
-        String filterStringStart="\nfilter(?";
+        String filterStringStart="\nfilter(";
         String filterString="";
         String filterStringFinal="";
         // add in filter based on cidocTarget and replace it with the entityString

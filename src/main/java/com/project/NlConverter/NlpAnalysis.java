@@ -78,6 +78,7 @@ public class NlpAnalysis {
     }
     
     public static String getSPARQLQuery(){
+        System.out.println("spark:: "+fullSPARQLQuery);
         return fullSPARQLQuery;
     }
 
