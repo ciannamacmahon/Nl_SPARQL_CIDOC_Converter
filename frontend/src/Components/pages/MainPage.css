@@ -27,10 +27,21 @@
     font-size: 15px;
     font-family: inherit;
     margin: 30px auto;
-    width:50%
-
-  }
-  
-  .resultBox p {
+    width:50%;
     font-size: 25px;
   }
+
+.resultContainer{
+  display: flex;
+  justify-content: space-evenly;
+}
+.sparqlResult{
+  display: flex;
+    align-items:center;
+    justify-content: center;
+    border: 3px solid rgb(17, 10, 10);
+    padding: 60px;
+    height: 100%;
+    font-size: 15px;
+}
+  

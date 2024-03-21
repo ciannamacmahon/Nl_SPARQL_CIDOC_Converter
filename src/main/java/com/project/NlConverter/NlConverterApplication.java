@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.ai.chat.ChatClient;
 import org.springframework.ai.chat.ChatResponse;
@@ -31,6 +32,7 @@ public class NlConverterApplication {
 	
 	NlpAnalysis nlp=new NlpAnalysis();
 	private static final Logger LOGGER=LoggerFactory.getLogger(NlConverterApplication.class);
+	private String nlResult;
 
 	OpenAiApi openAiApi = new OpenAiApi(System.getenv("OPENAI_API_KEY"));
 	private final ChatClient chatClient;
@@ -55,6 +57,7 @@ public class NlConverterApplication {
 		try{
 			System.out.println(userInputQuery);
 			nlp.entryPoint(userInputQuery);
+			nlResult=connectGPT();
 			return "Query ok";
 		}catch(FileNotFoundException e){
 			e.printStackTrace();
@@ -71,28 +74,32 @@ public class NlConverterApplication {
 	}
 	@GetMapping("/naturalLanguageResult")
 	public String retreiveNLResult() {
-		String promt=nlp.getChatGPTPrompt();
 		LOGGER.info("greeting received");
-		
-	ChatResponse response = chatClient.call(
-    new Prompt(promt,
-	OpenAiChatOptions.builder()
-	.withModel("gpt-3.5-turbo")
-	.withTemperature((float) 0.4)
-	.build()
-	));
-	AssistantMessage assistantMessage=response.getResult().getOutput();
-	if(assistantMessage!=null){
-		return assistantMessage.getContent();
-	}else{
-		return "No response Generated";
+		return nlResult;
 	}
+	public String connectGPT(){
+		String prompt=nlp.getChatGPTPrompt();
+		ChatResponse response = chatClient.call(
+		new Prompt(prompt,
+			OpenAiChatOptions.builder()
+				.withModel("gpt-3.5-turbo")
+				.withTemperature((float) 0.4)
+				.build()
+		)
+	);
+	AssistantMessage assistantMessage=response.getResult().getOutput();
+	while(assistantMessage.getContent().contains("Hello")){
+		assistantMessage=response.getResult().getOutput();
+		System.out.println(assistantMessage.getContent());
+	}
+        return assistantMessage.getContent();
 
-	// laptop stopped working but full connection is made
-	/*
-	 * 
-	 */
 	}
 }
+		
+	
+	
+
+
 
 
