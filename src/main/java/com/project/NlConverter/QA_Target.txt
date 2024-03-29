@@ -1,5 +1,5 @@
-When, ?Date
-Where, ?PlaceName
-Who, ?Person
-What, ?variable
-How many, ?variable
+when, ?Date
+where, ?PlaceName
+who, ?Person
+what, ?variable
+how many, ?variable

@@ -17,8 +17,8 @@ import java.util.Scanner;
 public class NlpAnalysis {
     public static LinkedList<String> depQualities = new LinkedList<>();
     public static LinkedList<String[]> quest_ans_targets=new LinkedList<>();
-    public static LinkedList<String> question_entity=new LinkedList<>();
-    public static LinkedList<String> question_entity_type=new LinkedList<>();
+    public static String question_entity="";
+    public static String question_entity_type="";
     public static String subject="";
     public static String predicate="";
     public static LinkedList <String> object=new LinkedList<>();
@@ -31,7 +31,6 @@ public class NlpAnalysis {
     public static String filterCondition="";
     private static String fullSPARQLQuery="";
     private static String graphAnswer="";
-    private static String naturalLanguageResult="";
     private static String chatGPTPrompt="";
 
     public static void QuestionList(){
@@ -43,15 +42,36 @@ public class NlpAnalysis {
         QuestionArray[5]="Count";
 
     }
+    public static void resetProperties() {
+        depQualities.clear();
+        quest_ans_targets.clear();
+        question_entity="";
+        question_entity_type="";
+        subject = "";
+        predicate = "";
+        object.clear();
+        questionWord = "";
+        targetAnswer = "";
+        unknown = "";
+        containsFilter = false;
+        filterCondition = "";
+        fullSPARQLQuery = "";
+        graphAnswer = "";
+        chatGPTPrompt = "";
+    }
+    NlpAnalysis(){
+        Properties props = new Properties();
+        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
+        pipeline = new StanfordCoreNLP(props);
+
+    }
 
    //public static void main(String args[]) throws FileNotFoundException{
    //    entryPoint("How many people were born in 1600?");
    // }
     public static void entryPoint(String userInputQuery) throws FileNotFoundException {
        // QuestionList();
-        Properties props = new Properties();
-        props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse");
-        pipeline = new StanfordCoreNLP(props);
+        resetProperties();
         //String question = "Who was born in Dublin? ";
         languageAnalysis(userInputQuery);
         System.out.println(userInputQuery);
@@ -104,10 +124,10 @@ public class NlpAnalysis {
                 targetAnswer=q[1];
             }
         }
-        if (questionWord.equals("Who")|| questionWord.equals("How many")|| questionWord.equals("Count")){
+        if (questionWord.equals("who")|| questionWord.equals("how many")|| questionWord.equals("count")){
             unknown="subject";
         }
-        else if (questionWord.equals("When")||questionWord.equals("Where")){
+        else if (questionWord.equals("when")||questionWord.equals("where")){
             unknown="object";
         }
         System.out.println("Target Answer: "+targetAnswer+" Word type: "+unknown);
@@ -122,16 +142,13 @@ public class NlpAnalysis {
         // this extracts it using the root as the predicate and the subject is the entity extraction
         if( unknown.equals("subject")){
             //entity is the object of the question
-            for(String entity:question_entity){
-                object.add(entity);
-            }
+                object.add(question_entity);
+            
            // System.out.print("objects: "+object.get(0));
             subject=targetAnswer;
         }
         else if(unknown.equals("object")){
-            for(String entity:question_entity){
-                subject=entity;
-            }
+                subject=question_entity;
             object.add(targetAnswer);
         }
         for (String[] array : listOfArray) {
@@ -203,8 +220,8 @@ public class NlpAnalysis {
     public static void languageAnalysis(String query){
         //String withoutQ=removeQ(query);
         CoreDocument document = new CoreDocument(query);
-        Annotation annDocument=new Annotation(query);
-        pipeline.annotate(annDocument);
+    //    Annotation annDocument=new Annotation(query);
+    //    pipeline.annotate(annDocument);
         pipeline.annotate(document);
         findNER(document);
         findPOStags(document);
@@ -237,10 +254,10 @@ public class NlpAnalysis {
             System.out.println(String.format("%s\t%s", firstToken.word(),firstToken.tag()));
             if(firstToken.tag().contains("W")){
                 if(nextToken.word().contains("many")||nextToken.word().contains("much")){
-                    questionWord= firstToken.word()+" "+nextToken.word();
+                    questionWord= firstToken.word().toLowerCase()+" "+nextToken.word();
                 }
                 else{
-                    questionWord=firstToken.word();
+                    questionWord=firstToken.word().toLowerCase();
                 }
             }
         }
@@ -257,16 +274,14 @@ public class NlpAnalysis {
             String entityText=em.text();
             if(entityType.equals(currEntityType)){
                 // combinedEntity.append(", ").append(entityText); person
-                question_entity.add(entityText);
+                question_entity=entityText;
         }
             else{
-                question_entity_type.add(entityType);
-                question_entity.add(entityText);
+                question_entity_type=entityType;
+                question_entity=entityText;
                 currEntityType=entityType;
                 combinedEntity.append(entityText);
-                if(question_entity_type.size()>1){
-                    containsFilter=true;
-                }
+               
             }
           //  System.out.println("\tdetected entity: \t"+em.text()+"\t"+em.entityType());
           //  question_entity=em.text();

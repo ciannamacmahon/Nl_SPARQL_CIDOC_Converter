@@ -19,7 +19,7 @@ public class Sparql {
             "        PREFIX vt_ont: <https://ont.virtualtreasury.ie/ontology#>\n";
 
             
-    public static String createSPARQLQuery(LinkedList<String> entityType, LinkedList<String> entity,String question,String subj,
+    public static String createSPARQLQuery(String entityType, String entity,String question,String subj,
     String pred,LinkedList <String> obj,boolean rangeFilter,String filterCondition)
     {
         populateCIDOCDictionary();
@@ -48,14 +48,14 @@ public class Sparql {
         String queryType="";
         // shoudl this go here so can add in list of objects to the constructor if there is loads of objects for the filter ie. between dates
        // String filterPart="";
-        if(question.contains("How many")){
+        if(question.contains("how many")){
             //currently default so will count number of people under the given header 'people'
             queryType="select(count(distinct ?person)as ?people )";
         }
         else{
             queryType="select distinct"+selectTarget;
         }
-        String filterPart=filterQuery(entity,entityType,rangeFilter,obj,filterCondition);
+        String filterPart=filterQuery(entity,entityType,rangeFilter,filterCondition);
 
 
             //substitute the name in the person part of the query
@@ -80,7 +80,7 @@ public class Sparql {
         String finalSelect="?"+selection;
         return finalSelect;
     }
-    public static String filterQuery(LinkedList<String> entityString,LinkedList<String> entityT,boolean rangeFilter,LinkedList<String> objectList,String filterCondition){
+    public static String filterQuery(String entityString,String entityT,boolean rangeFilter,String filterCondition){
         String filterStringEnd=").";
         String filterStringStart="\nfilter(";
         String filterString="";
@@ -90,22 +90,23 @@ public class Sparql {
 
         }
         else{
-            // works for AND condition
-            for(int i=0;i<objectList.size();i++){
-                String objWord=objectList.get(i);
-                // crashes as if its same entity then not added to entity list
-            //    System.out.println(entityT.get(i));
-                if (objWord.matches(".*\\d+.*")){
+                if (entityString.matches(".*\\d+.*")){
                     System.out.println("check three");
-                    filterString=dateQuery(objWord,cidocTarget);
+                    filterString=dateQuery(entityString,cidocTarget);
                 }
-                else {
-                    filterString=filterStringStart+"CONTAINS(str(?"+cidocTarget+") ,'"+objWord+"')";
+                else if (entityT.contains("PERSON")){
+                    String[]name=entityString.split(" ");
+                    String appelation=name[1]+", "+name[0];
+                    filterString=filterStringStart+"CONTAINS(str(?personName) ,'"+appelation+"')";
                     System.out.println("check four");
 
                 }
+                else {
+                    filterString=filterStringStart+"CONTAINS(str(?"+cidocTarget+") ,'"+entityString+"')";
+
+                }
                 filterStringFinal=filterStringFinal+filterString;
-            }
+            
         }
         filterStringFinal=filterStringFinal+filterStringEnd;
         System.out.println("Final "+filterStringFinal);
@@ -155,10 +156,6 @@ public class Sparql {
 
         return filterString;
     }
-    public static String placeQuery(String bodyQuery,String enity){
-        return bodyQuery=bodyQuery.replace("?bearPlaceName","'"+enity+"'");
-
-    }
 
     public static boolean isFullFormat(String date){
         SimpleDateFormat fullFormat=new SimpleDateFormat("yyyy-MM-dd");
@@ -172,18 +169,13 @@ public class Sparql {
             return false;
         }
     }
-    public static String personQuery(LinkedList<String> entityType, LinkedList<String> entity){
+    public static String personQuery(String entityType, String entity){
         String nameAppellation="normalized-appellation-surname-forename";
         String findPerson="?person crm:P1_is_identified_by ?appellation.\n"+
                 "       ?appellation rdfs:label ?personName. ";
-        if(entityType.equals("PERSON")){
-          //  String []personN=entity.split(" ");
-          //  String surname_forename=personN[1]+", "+personN[0];
-          //  findPerson=findPerson.replace("?personName","'"+surname_forename+"'.");
-        }
-        else{
+
             findPerson=findPerson+"FILTER(CONTAINS(str(?appellation),'"+nameAppellation+"')).";
-        }
+        
         return findPerson;
     }
     public static String findCIDOC(String cidoc){
@@ -200,10 +192,10 @@ public class Sparql {
                 "       ?timespanA crm:P82a_begin_of_the_begin ?bearDate.");
 
         cidoc_dict.put("bearPlaceName","?birth rdf:type crm:E67_Birth;\n" +
-                "       crm:P7_took_place_at ?bearPlace;\n" +
+                "       crm:P7_took_place_at ?bearPlaceName;\n" +
                 "       crm:P98_brought_into_life ?person.\n" +
-                "?bearPlace crm:P1_is_identified_by ?bearPlaceLink.\n" +
-                "?bearPlaceLink rdfs:label ?bearPlaceName.");
+                "OPTIONAL{?bearPlace crm:P1_is_identified_by ?bearPlaceLink.\n" +
+                "?bearPlaceLink rdfs:label ?bearPlaceName.}");
 
         cidoc_dict.put("dieDate","?death rdf:type crm:E69_Death;\n"+
         "       crm:P4_has_time-span ?timespanA;\n"+
@@ -211,10 +203,10 @@ public class Sparql {
                 "       ?timespanA crm:P82b_end_of_the_end ?dieDate.");
 
         cidoc_dict.put("diePlaceName","?death rdf:type crm:E69_Death;\n"+
-                "       crm:P7_took_place_at ?diePlace;" +
+                "       crm:P7_took_place_at ?diePlaceName;" +
                 "       crm:P93_took_out_of_existence ?person."+
-                "?diePlace crm:P1_is_identified_by ?diePlaceLink." +
-                "?diePlaceLink rdfs:label ?diePlaceName.");
+                "OPTIONAL{?diePlace crm:P1_is_identified_by ?diePlaceLink." +
+                "?diePlaceLink rdfs:label ?diePlaceName.}");
 
     }
 
