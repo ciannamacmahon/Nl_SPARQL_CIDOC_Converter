@@ -21,7 +21,7 @@ public class NlpAnalysis {
     public static String question_entity_type="";
     public static String subject="";
     public static String predicate="";
-    public static LinkedList <String> object=new LinkedList<>();
+    public static String object="";
     public static String questionWord="";
     public static String targetAnswer="";
     public static String unknown="";
@@ -49,7 +49,7 @@ public class NlpAnalysis {
         question_entity_type="";
         subject = "";
         predicate = "";
-        object.clear();
+        object="";
         questionWord = "";
         targetAnswer = "";
         unknown = "";
@@ -142,14 +142,29 @@ public class NlpAnalysis {
         // this extracts it using the root as the predicate and the subject is the entity extraction
         if( unknown.equals("subject")){
             //entity is the object of the question
-                object.add(question_entity);
+            object=question_entity;
             
            // System.out.print("objects: "+object.get(0));
             subject=targetAnswer;
+            
         }
         else if(unknown.equals("object")){
+            if(question_entity==""){
+                for (String[] array : listOfArray){
+                    if (array[0].equals("compound")) {
+                        String firstName=array[2].substring(0,array[2].indexOf("-"));
+                        firstName=firstName.substring(0,1).toUpperCase()+firstName.substring(1);
+                        String secondName=array[1].substring(0, array[1].indexOf("-"));
+                        secondName=secondName.substring(0,1).toUpperCase()+secondName.substring(1);
+                        subject=firstName+" "+secondName;
+                    }
+                }
+                question_entity_type="PERSON";
+                question_entity=subject;
+            }else{
                 subject=question_entity;
-            object.add(targetAnswer);
+            }
+                object=targetAnswer;
         }
         for (String[] array : listOfArray) {
             if (array[0].equals("root")) {
@@ -159,7 +174,7 @@ public class NlpAnalysis {
             if(array[0].equals("obl"))
             {
                 System.out.println("tester");
-                object.add(array[2].substring(0,array[2].indexOf("-")));     
+                object=array[2].substring(0,array[2].indexOf("-"));     
                 question_entity=array[2].substring(0,array[2].indexOf("-"));
                 question_entity_type="PLACE";
            }
@@ -291,15 +306,7 @@ public class NlpAnalysis {
                 combinedEntity.append(entityText);
                
             }
-          //  System.out.println("\tdetected entity: \t"+em.text()+"\t"+em.entityType());
-          //  question_entity=em.text();
         }
-     //   String combinedEntityFinal=combinedEntity.toString().trim();
-     ////   System.out.println("tester: "+combinedEntityFinal);
-     //   if(combinedEntityFinal.contains("and")){
-    //        combinedEntityFinal.replace("and", "");
-    //    }
-    //    question_entity=combinedEntityFinal;
         System.out.println("Entity: "+question_entity);
         System.out.println("Entity type: "+question_entity_type);
 

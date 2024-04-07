@@ -20,7 +20,7 @@ public class Sparql {
 
             
     public static String createSPARQLQuery(String entityType, String entity,String question,String subj,
-    String pred,LinkedList <String> obj,boolean rangeFilter,String filterCondition)
+    String pred,String obj,boolean rangeFilter,String filterCondition)
     {
         populateCIDOCDictionary();
         String selectTarget="";
@@ -33,21 +33,18 @@ public class Sparql {
                     selectTarget=selectTarget+" ?person";
                 }
         }
-        else if(obj.size()==1 && obj.get(0).contains("?")){
-            String objExtracted=obj.get(0);
+        else if(obj.contains("?")){
             //object is the intent of the question
             // normaly the pred combined with object question is intent
             //bearPlaceName
-            selectTarget=selectSection(pred+objExtracted.substring(1,objExtracted.length()));
+            selectTarget=selectSection(pred+obj.substring(1,obj.length()));
             
         }
         if (entityType.contains("PERSON")){
             selectTarget=selectTarget+" ?person";
 
         }
-        for(String word:obj){
-            System.out.println("objects are ; "+word);
-        }
+       
 
         String body=bodyQuery(subj,pred,obj);
 
@@ -117,24 +114,22 @@ public class Sparql {
         
         return filterStringFinal;
     }
-    public static String bodyQuery(String subj,String pred,LinkedList<String> obj){
+    public static String bodyQuery(String subj,String pred,String obj){
         // whats the target?
         String bodySPARQLQuery="";
         if(subj.contains("?")){
             // subject is the target
-            String extractedObj=obj.get(0);
-            System.out.println("first object is "+extractedObj);
-            if (obj.get(0).matches(".*\\d+.*")){
+            System.out.println("Object is "+obj);
+            if (obj.matches(".*\\d+.*")){
                 cidocTarget=pred+"Date";
             }
             else{
                 cidocTarget=pred+"PlaceName";
             }
         }
-        else if (obj.get(0).contains("?")){
-            String objExtract=obj.get(0);
+        else if (obj.contains("?")){
             //object is the target
-            cidocTarget=pred+objExtract.substring(1,objExtract.length());
+            cidocTarget=pred+obj.substring(1,obj.length());
         }
         bodySPARQLQuery=findCIDOC(cidocTarget);
         return bodySPARQLQuery;
