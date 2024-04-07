@@ -30,8 +30,6 @@
   }
 
   .resultBox {
-    /* grid-template-rows: 10fr 1fr;
-    flex-direction: row; */
     background-color: rgb(253, 251, 255);
     display: flex;
     align-items:center;

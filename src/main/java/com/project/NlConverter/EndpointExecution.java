@@ -43,10 +43,9 @@ public class EndpointExecution {
                 String selectVariable = variables.next();
                 String resultVariable = solution.get(selectVariable).toString();
                 System.out.println(selectVariable + ": " + resultVariable);
-                finalResult=finalResult+resultVariable;
+                finalResult=finalResult+resultVariable+"\n";
             }
         }
         return finalResult;
-
     }
 }

@@ -56,14 +56,6 @@ function MainPage() {
         fetchResult();
       }
     }
-    const handleViewGPT=()=>{
-      setShowNGPT(!showNGPT);
-    }
-    const handleViewNlResult=()=>{
-      if(showNlResult){
-        fetchNlResult();
-      }
-    }
 
     const fetchQuery=async () =>{
       const result= await axios.get("http://localhost:8080/sparqlQuery")
@@ -123,7 +115,18 @@ function MainPage() {
               <button onClick={handleViewSparqlResult}>View Raw SPARQL Result</button>
               {showSparqlResult && (
                 <div className="resultContainer">
-                  <p> SPARQL Result: {sparqlResult}</p>
+                  <p> SPARQL Result: </p>
+                  <pre>
+                    {sparqlResult.split("\n").map((url,index)=>
+                    url.trim() ?(
+                      <div key={index}>
+                        <a href={url} target="_blank_" rel="noopener no referrer">
+                        {url}
+                        </a>
+                      </div>
+                    ):null 
+              )}
+                  </pre>
                   </div>
               )}
             </div>

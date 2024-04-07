@@ -30,6 +30,7 @@ public class Sparql {
                 String typeQ=subj.substring(1,subj.length());
                 if (typeQ.equals("Person")){
                     selectTarget=selectSection("personName");
+                    selectTarget=selectTarget+" ?person";
                 }
         }
         else if(obj.size()==1 && obj.get(0).contains("?")){
@@ -38,6 +39,11 @@ public class Sparql {
             // normaly the pred combined with object question is intent
             //bearPlaceName
             selectTarget=selectSection(pred+objExtracted.substring(1,objExtracted.length()));
+            
+        }
+        if (entityType.contains("PERSON")){
+            selectTarget=selectTarget+" ?person";
+
         }
         for(String word:obj){
             System.out.println("objects are ; "+word);
@@ -61,11 +67,6 @@ public class Sparql {
             //substitute the name in the person part of the query
         // person is the constant in all queries
         String person=personQuery(entityType,entity);
-
-        //the substitution has to be based on the entity type
-        if (entityType.contains("PERSON")){
-            //
-        }
         
         String fullQuery=prefixQuery+queryType+" Where {"+"\n"+person+"\n"+body+filterPart+"} Limit 5";
         System.out.println("---------------------------------");
@@ -203,8 +204,8 @@ public class Sparql {
                 "       ?timespanA crm:P82b_end_of_the_end ?dieDate.");
 
         cidoc_dict.put("diePlaceName","?death rdf:type crm:E69_Death;\n"+
-                "       crm:P7_took_place_at ?diePlaceName;" +
-                "       crm:P93_took_out_of_existence ?person."+
+                "       crm:P7_took_place_at ?diePlaceName;\n" +
+                "       crm:P93_took_out_of_existence ?person.\n"+
                 "OPTIONAL{?diePlace crm:P1_is_identified_by ?diePlaceLink." +
                 "?diePlaceLink rdfs:label ?diePlaceName.}");
 

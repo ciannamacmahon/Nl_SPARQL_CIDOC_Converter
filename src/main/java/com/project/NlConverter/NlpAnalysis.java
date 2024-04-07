@@ -77,7 +77,7 @@ public class NlpAnalysis {
         System.out.println(userInputQuery);
         populateTargetQuestions();
         predictTarget();
-        NlpAnalysis.pringQual(depQualities);
+        pringQual(depQualities);
         fullSPARQLQuery=Sparql.createSPARQLQuery(question_entity_type,question_entity,questionWord,subject,predicate,object,containsFilter,filterCondition);
       //  //if endpoint could compile
         graphAnswer=EndpointExecution.searchGraph(fullSPARQLQuery);
@@ -156,8 +156,16 @@ public class NlpAnalysis {
                 String lemmaVersionPred=lemmaQuery(array[2].substring(0, array[2].indexOf("-")));
                 predicate=lemmaVersionPred;
             }
+            if(array[0].equals("obl"))
+            {
+                System.out.println("tester");
+                object.add(array[2].substring(0,array[2].indexOf("-")));     
+                question_entity=array[2].substring(0,array[2].indexOf("-"));
+                question_entity_type="PLACE";
+           }
         }
         System.out.println("Subject: "+ subject+ " Predicate: "+predicate+ " Object: "+object);
+        System.out.println("Entity: "+question_entity+"\nEntity type: "+question_entity_type);
     }
     public static Boolean conatinsNsubj(String []array) {
         for (String element : array) {
@@ -296,16 +304,7 @@ public class NlpAnalysis {
         System.out.println("Entity type: "+question_entity_type);
 
     }
-// wont be using
- //   public static void constituencyParse(CoreDocument doc){
- //       CoreSentence sentence=doc.sentences().get(0);
- //       //Method 1:
- //       Tree constitParse1 = sentence.constituencyParse();
- //       System.out.println("Example: constituency parse");
- //       System.out.println(constitParse1);
- //       System.out.println();
-//
- //   }
+
     public static LinkedList<String> dependancyParser(String query)
     {
         LinkedList<String> depParse= new LinkedList<>();

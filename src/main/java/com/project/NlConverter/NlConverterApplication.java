@@ -2,26 +2,20 @@ package com.project.NlConverter;
 
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+
 
 import org.springframework.ai.chat.ChatClient;
 import org.springframework.ai.chat.ChatResponse;
-import org.springframework.ai.chat.Generation;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.openai.OpenAiChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.apache.lucene.util.automaton.LimitedFiniteStringsIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

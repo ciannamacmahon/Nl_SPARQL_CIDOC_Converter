@@ -53,7 +53,8 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
+		
+<!-- https://mvnrepository.com/artifact/edu.stanford.nlp/stanford-corenlp -->
 		<dependency>
 			<groupId>edu.stanford.nlp</groupId>
 			<artifactId>stanford-corenlp</artifactId>
