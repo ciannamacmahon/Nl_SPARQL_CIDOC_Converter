@@ -13,6 +13,7 @@ import edu.stanford.nlp.util.CoreMap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class NlpAnalysis {
     public static LinkedList<String> depQualities = new LinkedList<>();
@@ -81,9 +82,19 @@ public class NlpAnalysis {
         fullSPARQLQuery=Sparql.createSPARQLQuery(question_entity_type,question_entity,questionWord,subject,predicate,object,containsFilter,filterCondition);
       //  //if endpoint could compile
         graphAnswer=EndpointExecution.searchGraph(fullSPARQLQuery);
-        // Cannot include '\n' symbol in the prompt at all
+        if(questionWord.contains("who")){
+            String httpLines=Arrays.stream(graphAnswer.split("\n")).filter(line ->line.contains("http")).collect(Collectors.joining("\n"));
+            String gptNonHTTP=Arrays.stream(graphAnswer.split("\n")).filter(line ->!line.contains("http")).collect(Collectors.joining("\n"));
+            graphAnswer=httpLines;
+            chatGPTPrompt="Given this query: "+userInputQuery+"And this result of people's first and last name: "
+            +gptNonHTTP+" Turn the result into a natural language sentence";
+        }
+        else{
+            // Cannot include '\n' symbol in the prompt at all
         chatGPTPrompt="Given this query: "+userInputQuery+"And this result: "
-            +graphAnswer+" Turn the result into a natural language sentence";
+        +graphAnswer+" Turn the result into a natural language sentence";
+        }
+            
         
     }
     public static String getChatGPTPrompt(){
@@ -162,6 +173,7 @@ public class NlpAnalysis {
                 question_entity_type="PERSON";
                 question_entity=subject;
             }else{
+                question_entity=question_entity.substring(0,1).toUpperCase()+question_entity.substring(1);
                 subject=question_entity;
             }
                 object=targetAnswer;
@@ -175,7 +187,8 @@ public class NlpAnalysis {
             {
                 System.out.println("tester");
                 object=array[2].substring(0,array[2].indexOf("-"));     
-                question_entity=array[2].substring(0,array[2].indexOf("-"));
+                object=object.substring(0,1).toUpperCase()+object.substring(1);
+                question_entity=object;
                 question_entity_type="PLACE";
            }
         }
