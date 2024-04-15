@@ -13,6 +13,8 @@ import edu.stanford.nlp.util.CoreMap;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class NlpAnalysis {
@@ -75,21 +77,46 @@ public class NlpAnalysis {
         resetProperties();
         //String question = "Who was born in Dublin? ";
         languageAnalysis(userInputQuery);
-        System.out.println(userInputQuery);
         populateTargetQuestions();
         predictTarget();
         pringQual(depQualities);
         fullSPARQLQuery=Sparql.createSPARQLQuery(question_entity_type,question_entity,questionWord,subject,predicate,object,containsFilter,filterCondition);
       //  //if endpoint could compile
         graphAnswer=EndpointExecution.searchGraph(fullSPARQLQuery);
-        if(questionWord.contains("who")){
+        System.out.println(graphAnswer);
+        if(graphAnswer.trim()==""){
+            chatGPTPrompt="Given this query: "+userInputQuery+"And this result: Sorry there are no records available, please check your spelling/chosen year and try another question"
+                    +" Turn the result into a natural language sentence";
+        }
+        else if(graphAnswer.contains("http://www.w3.org/2001/XMLSchema#integer")){
+       // Pattern pattern = Pattern.compile("\\d+\\^\\^http://www\\.w3\\.org/2001/XMLSchema#integer");
+     //   Matcher matcher = pattern.matcher(graphAnswer);
+            System.out.println("DERTGERTGERT");
+
+            Pattern pattern2 = Pattern.compile("0\\^\\^");
+            Matcher matcher2 = pattern2.matcher(graphAnswer);
+            if(graphAnswer.contains("0^^"))
+            {
+                    // Extract the group of digits found just before '^^'
+                    chatGPTPrompt="Given this query: "+userInputQuery+"And this result: Sorry there are no results available, please try a different question"
+                    +" Turn the result into a natural language sentence";
+            }
+            else{
+                chatGPTPrompt="Given this query: "+userInputQuery+"And this result: "
+                +graphAnswer+" Turn the result into a natural language sentence";
+            }
+        
+            
+        }
+        
+        else if(questionWord.contains("who")){
             String httpLines=Arrays.stream(graphAnswer.split("\n")).filter(line ->line.contains("http")).collect(Collectors.joining("\n"));
             String gptNonHTTP=Arrays.stream(graphAnswer.split("\n")).filter(line ->!line.contains("http")).collect(Collectors.joining("\n"));
             graphAnswer=httpLines;
             chatGPTPrompt="Given this query: "+userInputQuery+"And this result of people's first and last name: "
             +gptNonHTTP+" Turn the result into a natural language sentence";
         }
-        else{
+        else if (chatGPTPrompt==""){
             // Cannot include '\n' symbol in the prompt at all
         chatGPTPrompt="Given this query: "+userInputQuery+"And this result: "
         +graphAnswer+" Turn the result into a natural language sentence";
@@ -119,7 +146,7 @@ public class NlpAnalysis {
         Scanner scanner= new Scanner(file);
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
-            System.out.println(line);
+           // System.out.println(line);
             String[] parts = line.split(", ");
 
             // Add the array to the list
@@ -160,7 +187,6 @@ public class NlpAnalysis {
             
         }
         else if(unknown.equals("object")){
-            if(question_entity==""){
                 for (String[] array : listOfArray){
                     if (array[0].equals("compound")) {
                         String firstName=array[2].substring(0,array[2].indexOf("-"));
@@ -168,16 +194,19 @@ public class NlpAnalysis {
                         String secondName=array[1].substring(0, array[1].indexOf("-"));
                         secondName=secondName.substring(0,1).toUpperCase()+secondName.substring(1);
                         subject=firstName+" "+secondName;
+                        if(question_entity==subject){
+                            question_entity=question_entity.substring(0,1).toUpperCase()+question_entity.substring(1);
+                            subject=question_entity;
+                        }else{
+                            question_entity_type="PERSON";
+                            question_entity=subject;
+                        }
+                        
+                    }
                     }
                 }
-                question_entity_type="PERSON";
-                question_entity=subject;
-            }else{
-                question_entity=question_entity.substring(0,1).toUpperCase()+question_entity.substring(1);
-                subject=question_entity;
-            }
                 object=targetAnswer;
-        }
+        
         for (String[] array : listOfArray) {
             if (array[0].equals("root")) {
                 String lemmaVersionPred=lemmaQuery(array[2].substring(0, array[2].indexOf("-")));
@@ -244,7 +273,7 @@ public class NlpAnalysis {
 
     //Test method; each item in the list is the characteristic of that word
     public static void pringQual(LinkedList <String>qualOfQuery){
-        System.out.println("Dependancy Paerse");
+        System.out.println("\nDependency Parser");
         for (String line:qualOfQuery){
 
             System.out.println("\n"+line);
@@ -272,10 +301,9 @@ public class NlpAnalysis {
         pipeline.annotate(doc);
         String lemmaVersion="";
         for(CoreLabel tok:doc.tokens()){
-            System.out.println(String.format("%s\t%s", tok.word(), tok.lemma()));
+            System.out.println(String.format("%s\t%s", tok.word(),"\nLemmatisation: "+ tok.lemma()));
             lemmaVersion=tok.lemma();
         }
-        System.out.println(lemmaVersion);
         return lemmaVersion;
     }
 
@@ -283,6 +311,7 @@ public class NlpAnalysis {
         //Method 1
         List<CoreLabel> tokens=doc.tokens();
         int y=0;
+        System.out.println("POS tags:");
         for(int i=0; i<tokens.size()-1;i++){
             CoreLabel firstToken=tokens.get(i);
             y=i+1;
@@ -297,14 +326,14 @@ public class NlpAnalysis {
                 }
             }
         }
-        System.out.println("question: "+questionWord);
+        System.out.println("\nIdentified Question: "+questionWord);
     }
     public static void findNER(CoreDocument doc){
         //CoreMap sentence=doc.get(CoreAnnotations.SentencesAnnotation.class).get(0);
         StringBuilder combinedEntity=new StringBuilder();
         String currEntityType=null;
         System.out.println("---");
-        System.out.println("entities found");
+        System.out.println("Entities found");
         for (CoreEntityMention em :doc.entityMentions()){
             String entityType=em.entityType();
             String entityText=em.text();
@@ -321,7 +350,7 @@ public class NlpAnalysis {
             }
         }
         System.out.println("Entity: "+question_entity);
-        System.out.println("Entity type: "+question_entity_type);
+        System.out.println("Entity type: "+question_entity_type+"\n");
 
     }
 
@@ -335,7 +364,6 @@ public class NlpAnalysis {
 
         SemanticGraph depGraph =sentence.get(SemanticGraphCoreAnnotations.BasicDependenciesAnnotation.class);
         //Gets the dependancy Parse
-        System.out.println("Depenecy parse");
         for (TypedDependency typedDependency : depGraph.typedDependencies()) {
             String line = typedDependency.toString();
             depParse.add(line);

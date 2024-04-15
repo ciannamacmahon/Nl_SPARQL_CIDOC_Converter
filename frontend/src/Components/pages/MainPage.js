@@ -87,7 +87,7 @@ function MainPage() {
               <input 
               
                 type="text" 
-                placeholder="Enter your search query on the VRTI KG"
+                placeholder="Enter your question for the VRTI KG! E.g. Who was born in 1916?"
                 onChange={handleChange} 
                 value={searchInput}
                 className="input"
@@ -107,15 +107,19 @@ function MainPage() {
               <img src={GPTimage} className="gptImage"/>
             </div>
           ):(
-            <p>Enter your Query in the Search bar above</p>
+            <div>
+            <p className="titleText">Enter your Question in the Search bar above
+               {'\n'} </p>
+            <p className="baseText">Please make sure your spelling and capitalisation for people's name and counties are correct</p>
+          </div>
           )}
           </div>
           <div className="resultContainer">
             <div>
-              <button onClick={handleViewSparqlResult}>View Raw SPARQL Result</button>
+              <button onClick={handleViewSparqlResult}>View SPARQL Result</button>
               {showSparqlResult && (
                 <div className="resultContainer">
-                  <p> SPARQL Result: </p>
+                  <p> SPARQL Result: Click on the links to Explore!</p>
                   <pre>
                     {sparqlResult.split("\n").map((url,index)=>
                     url.trim() ?(

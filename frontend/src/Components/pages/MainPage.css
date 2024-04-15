@@ -76,4 +76,14 @@
     margin: 10px auto; /* Adds vertical margin and centers the image horizontally */
 }
 
+.baseText {
+  font-family: 'Cochin';
+  font-size: medium;
+}
+
+.titleText {
+  font-size: large;
+  font-weight:bold;
+}
+
   

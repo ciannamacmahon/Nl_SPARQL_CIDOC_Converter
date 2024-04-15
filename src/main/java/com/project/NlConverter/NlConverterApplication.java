@@ -82,7 +82,7 @@ public class NlConverterApplication {
 		)
 	);
 	AssistantMessage assistantMessage=response.getResult().getOutput();
-	while(assistantMessage.getContent().contains("Hello")){
+	while(assistantMessage.getContent().contains("Hello!")){
 		assistantMessage=response.getResult().getOutput();
 		System.out.println(assistantMessage.getContent());
 	}
